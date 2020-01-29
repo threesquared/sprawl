@@ -114,11 +114,14 @@ const App: React.FC = () => {
           visible={activeMarker !== null}
         >
           { selectedPub && (<div>
-            <h3><a href={ `https://www.jdwetherspoon.com${selectedPub.url}` } target="_blank" rel="noopener noreferrer">{ selectedPub.name }</a></h3>
+            <h3>{ selectedPub.name }</h3>
             <small>
               { selectedPub.address1 }<br/>
               { selectedPub.city } { selectedPub.postcode }
             </small>
+            <p>
+              <a href={ `https://www.google.com/maps/dir/?api=1&origin=${start?.lat},${start?.lng}&destination=${selectedPub.lat},${selectedPub.lng}` } target="_blank" rel="noopener noreferrer">Directions</a> | <a href={ `https://www.jdwetherspoon.com${selectedPub.url}` } target="_blank" rel="noopener noreferrer">Website</a>
+            </p>
           </div> ) }
         </InfoWindow>
       </Map>
