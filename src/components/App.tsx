@@ -11,7 +11,7 @@ import CrawlInfo from './CrawlInfo';
 
 const App: React.FC = () => {
   const [start, setStart] = useState<LatLon>();
-  const [locations, setLocations] = useState<Pub[]>([]);
+  const [pubs, setPubs] = useState<Pub[]>([]);
   const [bounds, setBounds] = useState<google.maps.LatLngBounds>();
   const [activeMarker, setActiveMarker] = useState<google.maps.Marker>();
   const [selectedPub, setSelectedPub] = useState<Pub>();
@@ -32,9 +32,9 @@ const App: React.FC = () => {
 
     setStart(start);
 
-    const { pubs, bounds } = nearestPubNextMethod(start, allPubs, pubLimit, distanceLimit);
+    const { crawlPubs, bounds } = nearestPubNextMethod(start, allPubs, pubLimit, distanceLimit);
 
-    setLocations(pubs);
+    setPubs(crawlPubs);
     setBounds(bounds);
   }
 
@@ -53,9 +53,9 @@ const App: React.FC = () => {
         setDistanceLimit={ setDistanceLimit }
         onSubmit={ () => start ? plotCrawl(start) : false }
       />
-      { locations.length && (
+      { pubs.length && (
         <CrawlInfo
-          pubs={ locations }
+          pubs={ pubs }
         />
       ) }
       <Map
@@ -77,10 +77,10 @@ const App: React.FC = () => {
             onDragend={ markerMoved }
           />
         ) }
-        { locations.map(location => (
+        { pubs.map(pub => (
           <Marker
-            key={ location.id }
-            position={ location }
+            key={ pub.id }
+            position={ pub }
             icon={{
               url: icon,
               size: new google.maps.Size(200,200),
@@ -88,13 +88,13 @@ const App: React.FC = () => {
               anchor: new google.maps.Point(16,32)
             }}
             onClick={ (props, marker) => {
-              setSelectedPub(location);
+              setSelectedPub(pub);
               setActiveMarker(marker);
             } }
           />
         )) }
         <Polyline
-          path={ locations }
+          path={ pubs }
           strokeColor="#0000FF"
           strokeOpacity={ 0.8 }
           strokeWeight={ 2 }

@@ -45,18 +45,20 @@ export function milesToMeters(distance: number) {
  * @param distanceLimit
  */
 export function nearestPubNextMethod(start: LatLon, allPubs: Pub[], pubLimit: number, distanceLimit: number) {
-  const pubs = [];
+  const crawlPubs = [];
+  const availablePubs = allPubs;
 
   const bounds = new google.maps.LatLngBounds();
-  let nextPub = shiftClosestPub(start, allPubs);
+  let nextPub = shiftClosestPub(start, availablePubs);
 
   for (let i=0; i < pubLimit; i++) {
     console.log('Adding', nextPub);
 
-    pubs.push(nextPub);
+    crawlPubs.push(nextPub);
+
     bounds.extend(nextPub);
 
-    nextPub = shiftClosestPub(new LatLon(nextPub.lat, nextPub.lng), allPubs);
+    nextPub = shiftClosestPub(new LatLon(nextPub.lat, nextPub.lng), availablePubs);
 
     if(start.distanceTo(new LatLon(nextPub.lat, nextPub.lng)) > milesToMeters(distanceLimit)) {
       break;
@@ -65,6 +67,6 @@ export function nearestPubNextMethod(start: LatLon, allPubs: Pub[], pubLimit: nu
 
   return {
     bounds,
-    pubs
+    crawlPubs
   }
 }
