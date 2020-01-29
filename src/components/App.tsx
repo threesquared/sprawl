@@ -1,50 +1,53 @@
 import React, { useState, useEffect } from 'react';
 import LatLon from 'geodesy/latlon-spherical.js'
 import { GoogleApiWrapper, Map, Marker, Polyline, InfoWindow } from 'google-maps-react';
-import { nearestPubNextMethod } from '../lib/calc';
+import { nearestPubNextMethod, nearestTowardsEndNextMethod, Dijkstra } from '../lib/calc';
 import { getAllPubs, Pub } from '../lib/spoons';
 import icon from '../lib/icon';
 import Nav from './Nav';
 import PubInfo from './PubInfo';
-import './App.css';
 import CrawlInfo from './CrawlInfo';
+import './App.css';
 
 const App: React.FC = () => {
   const [start, setStart] = useState<LatLon>();
+  const [end, setEnd] = useState<LatLon>();
   const [pubs, setPubs] = useState<Pub[]>([]);
   const [bounds, setBounds] = useState<google.maps.LatLngBounds>();
   const [activeMarker, setActiveMarker] = useState<google.maps.Marker>();
   const [selectedPub, setSelectedPub] = useState<Pub>();
   const [map, setMap] = useState<google.maps.Map>();
   const [pubLimit, setPubLimit] = useState(10);
-  const [distanceLimit, setDistanceLimit] = useState(20);
+  const [distanceLimit, setDistanceLimit] = useState(10);
 
   const allPubs = getAllPubs();
 
-  const markerMoved = (marker: any, event: any) => {
-    var latlon = new LatLon(event.position.lat(), event.position.lng());
-
-    plotCrawl(latlon);
-  };
-
-  const plotCrawl = (start: LatLon) => {
-    console.log('Generating crawl');
-
-    setStart(start);
-
-    const { crawlPubs, bounds } = nearestPubNextMethod(start, allPubs, pubLimit, distanceLimit);
-
-    setPubs(crawlPubs);
-    setBounds(bounds);
-  }
-
   useEffect(() => {
     navigator.geolocation.getCurrentPosition((position: Position) => {
-      var latlon = new LatLon(position.coords.latitude, position.coords.longitude);
-
-      plotCrawl(latlon);
+      setStart(new LatLon(position.coords.latitude, position.coords.longitude));
     });
   }, []);
+
+  useEffect(() => {
+    console.log('Generating crawl');
+
+    if (!start) {
+      return;
+    }
+
+    if (end) {
+
+      let { crawlPubs, bounds } = nearestTowardsEndNextMethod(start, end, allPubs);
+
+      setPubs(crawlPubs);
+      setBounds(bounds);
+    } else {
+      const { crawlPubs, bounds } = nearestPubNextMethod(start, allPubs, pubLimit, distanceLimit);
+
+      setPubs(crawlPubs);
+      setBounds(bounds);
+    }
+  }, [start, end, pubLimit, distanceLimit]);
 
   return (
     <div className="app">
@@ -52,7 +55,6 @@ const App: React.FC = () => {
       <Nav
         setPubLimit={ setPubLimit }
         setDistanceLimit={ setDistanceLimit }
-        onSubmit={ () => start ? plotCrawl(start) : false }
       />
       { pubs.length && (
         <CrawlInfo
@@ -64,7 +66,8 @@ const App: React.FC = () => {
         mapTypeControl={ false }
         fullscreenControl={ false }
         zoom={ 10 }
-        onClick={ () => setActiveMarker(undefined) }
+        onClick={ (props, map, event) => setStart(new LatLon(event.latLng.lat(), event.latLng.lng())) }
+        onRightclick={ (props, map, event) => setEnd(new LatLon(event.latLng.lat(), event.latLng.lng())) }
         onReady={ (props, map) => setMap(map) }
         bounds={ bounds }
         initialCenter={{
@@ -76,7 +79,7 @@ const App: React.FC = () => {
           <Marker
             position={ start }
             draggable={ true }
-            onDragend={ markerMoved }
+            onDragend={ (marker: any, event: any) => setStart(new LatLon(event.position.lat(), event.position.lng())) }
           />
         ) }
         { pubs.map(pub => (
@@ -95,6 +98,13 @@ const App: React.FC = () => {
             } }
           />
         )) }
+        { end && (
+          <Marker
+            position={ end }
+            draggable={ true }
+            onDragend={ (marker: any, event: any) => setEnd(new LatLon(event.position.lat(), event.position.lng())) }
+          />
+        ) }
         <Polyline
           path={ pubs }
           strokeColor="#0000FF"

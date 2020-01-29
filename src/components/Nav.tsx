@@ -1,7 +1,7 @@
 import React from 'react';
 import './Nav.css';
 
-const Nav: React.FC<{ setPubLimit: Function, setDistanceLimit: Function, onSubmit: any }> = ({ setPubLimit, setDistanceLimit, onSubmit }) => {
+const Nav: React.FC<{ setPubLimit: Function, setDistanceLimit: Function }> = ({ setPubLimit, setDistanceLimit }) => {
   return (
     <div className="nav">
       <h3>Spoons Pub Crawl Generator</h3>
@@ -9,12 +9,10 @@ const Nav: React.FC<{ setPubLimit: Function, setDistanceLimit: Function, onSubmi
         I want to visit up to
         <input type="number" placeholder="10" onChange={ event => setPubLimit(parseInt(event.target.value) || 10) } name="pubLimit" />
         pubs <br /> and only end up
-        <input type="number" placeholder="20" onChange={ event => setDistanceLimit(parseInt(event.target.value) || 20) } name="distanceLimit" /> miles away
-        <br />
-        <button type="button" onClick={ onSubmit }>Recalculate</button>
+        <input type="number" placeholder="10" onChange={ event => setDistanceLimit(parseInt(event.target.value) || 10) } name="distanceLimit" /> miles away
         <br />
         <br />
-        <small>* You can drag the red start location icon</small>
+        <small>* Left click to set a start location<br />* Right click to set an end location</small>
       </form>
     </div>
   );
