@@ -4,8 +4,10 @@ import apiData from '../spoons.json';
 import './App.css';
 import { Pub } from '../lib/spoons.js';
 import LatLon from 'geodesy/latlon-spherical.js'
-import { findClosest } from '../lib/calc';
+import { findClosestPub } from '../lib/calc';
 import { GoogleApiWrapper, Map, Marker, Polyline, InfoWindow } from 'google-maps-react';
+import Nav from './Nav';
+import PubInfo from './PubInfo';
 
 const App: React.FC = () => {
   const [start, setStart] = useState<LatLon>();
@@ -36,7 +38,7 @@ const App: React.FC = () => {
 
     const crawlPubs = [];
 
-    let nextPub = findClosest(start, allPubs);
+    let nextPub = findClosestPub(start, allPubs);
 
     for (let i=0; i < pubLimit; i++) {
       console.log('Adding', nextPub);
@@ -44,7 +46,7 @@ const App: React.FC = () => {
       crawlPubs.push(nextPub);
       bounds.extend(nextPub);
 
-      nextPub = findClosest(new LatLon(nextPub.lat, nextPub.lng), allPubs);
+      nextPub = findClosestPub(new LatLon(nextPub.lat, nextPub.lng), allPubs);
 
       if(start.distanceTo(new LatLon(nextPub.lat, nextPub.lng)) > (distanceLimit * 1609.344)) {
         break;
@@ -65,20 +67,11 @@ const App: React.FC = () => {
 
   return (
     <div className="App">
-      <div className="nav">
-        <h3>Spoons Crawl Generator</h3>
-        <form>
-          I want to visit
-          <input type="number" placeholder="10" onChange={ event => setPubLimit(parseInt(event.target.value) || 10) } name="pubLimit" />
-          pubs <br /> and only end up
-          <input type="number" placeholder="20" onChange={ event => setDistanceLimit(parseInt(event.target.value) || 20) } name="distanceLimit" /> miles away
-          <br />
-          <button type="button" onClick={ () => start ? plotCrawl(start) : false }>Recalculate</button>
-          <br />
-          <br />
-          <small>* You can drag the red start location icon</small>
-        </form>
-      </div>
+      <Nav
+        setPubLimit={ setPubLimit }
+        setDistanceLimit={ setDistanceLimit }
+        onSubmit={ () => start ? plotCrawl(start) : false }
+      />
       <Map
         google={ google }
         mapTypeControl={ false }
@@ -104,8 +97,8 @@ const App: React.FC = () => {
         ) }
         { locations.map(location => (
           <Marker
-            key={location.id}
-            position={location}
+            key={ location.id }
+            position={ location }
             icon={{
               url:`data:image/svg+xml;charset=utf-8,${encodeURIComponent(icon)}`,
               size: new google.maps.Size(200,200),
@@ -120,28 +113,24 @@ const App: React.FC = () => {
           />
         )) }
         <Polyline
-          path={locations}
+          path={ locations }
           strokeColor="#0000FF"
-          strokeOpacity={0.8}
-          strokeWeight={2}
+          strokeOpacity={ 0.8 }
+          strokeWeight={ 2 }
         />
         <InfoWindow
           google={ google }
           map={ map as google.maps.Map }
-          marker={activeMarker}
-          pixelOffset={new google.maps.Size(-85, 0)}
-          visible={activeMarker !== null}
+          marker={ activeMarker }
+          pixelOffset={ new google.maps.Size(-85, 0) }
+          visible={ activeMarker !== null }
         >
-          { selectedPub && (<div>
-            <h3>{ selectedPub.name }</h3>
-            <small>
-              { selectedPub.address1 }<br/>
-              { selectedPub.city } { selectedPub.postcode }
-            </small>
-            <p>
-              <a href={ `https://www.google.com/maps/dir/?api=1&origin=${start?.lat},${start?.lng}&destination=${selectedPub.lat},${selectedPub.lng}` } target="_blank" rel="noopener noreferrer">Directions</a> | <a href={ `https://www.jdwetherspoon.com${selectedPub.url}` } target="_blank" rel="noopener noreferrer">Website</a>
-            </p>
-          </div> ) }
+          { selectedPub && (
+            <PubInfo
+              pub={ selectedPub }
+              start={ start }
+            />
+          ) }
         </InfoWindow>
       </Map>
     </div>
@@ -149,5 +138,5 @@ const App: React.FC = () => {
 }
 
 export default GoogleApiWrapper({
-  apiKey: 'AIzaSyBETDtuc4hnJsvED2xeT6Lw99uJO_asPZI'
+  apiKey: process.env.REACT_APP_GOOGLE_API_KEY as string
 })(App)
