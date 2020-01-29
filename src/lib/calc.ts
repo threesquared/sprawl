@@ -9,13 +9,31 @@ import { Pub } from './spoons';
  */
 export function shiftClosestPub(start: LatLon, pubs: Pub[]): Pub {
   pubs.sort((a, b) => {
-    a.distanceTo = start.distanceTo(new LatLon(Number(a.lat), Number(a.lng)));
-    b.distanceTo = start.distanceTo(new LatLon(Number(b.lat), Number(b.lng)));
+    a.distanceToNext = start.distanceTo(new LatLon(Number(a.lat), Number(a.lng)));
+    b.distanceToNext = start.distanceTo(new LatLon(Number(b.lat), Number(b.lng)));
 
-    return a.distanceTo - b.distanceTo;
+    return a.distanceToNext - b.distanceToNext;
   });
 
   return pubs.shift() as Pub;
+}
+
+/**
+ * Convert meters to miles.
+ *
+ * @param distance
+ */
+export function metersToMiles(distance: number) {
+  return distance * 0.000621371192;
+}
+
+/**
+ * Convert meters to miles.
+ *
+ * @param distance
+ */
+export function milesToMeters(distance: number) {
+  return distance * 1609.344;
 }
 
 /**
@@ -40,7 +58,7 @@ export function nearestPubNextMethod(start: LatLon, allPubs: Pub[], pubLimit: nu
 
     nextPub = shiftClosestPub(new LatLon(nextPub.lat, nextPub.lng), allPubs);
 
-    if(start.distanceTo(new LatLon(nextPub.lat, nextPub.lng)) > (distanceLimit * 1609.344)) {
+    if(start.distanceTo(new LatLon(nextPub.lat, nextPub.lng)) > milesToMeters(distanceLimit)) {
       break;
     }
   }

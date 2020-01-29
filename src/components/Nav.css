@@ -1,0 +1,18 @@
+.nav {
+  z-index: 100;
+  position: absolute;
+  margin: 10px 0px 0px 10px;
+  background-color: #fff;
+  border: 1px #000 Solid;
+  padding: 0px 10px 10px 10px
+}
+
+input {
+  width: 50px;
+  margin-left: 5px;
+  margin-right: 5px;
+}
+
+button {
+  margin-top:  20px;
+}

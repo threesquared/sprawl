@@ -7,6 +7,7 @@ import icon from '../lib/icon';
 import Nav from './Nav';
 import PubInfo from './PubInfo';
 import './App.css';
+import CrawlInfo from './CrawlInfo';
 
 const App: React.FC = () => {
   const [start, setStart] = useState<LatLon>();
@@ -52,6 +53,11 @@ const App: React.FC = () => {
         setDistanceLimit={ setDistanceLimit }
         onSubmit={ () => start ? plotCrawl(start) : false }
       />
+      { locations.length && (
+        <CrawlInfo
+          pubs={ locations }
+        />
+      ) }
       <Map
         google={ google }
         mapTypeControl={ false }

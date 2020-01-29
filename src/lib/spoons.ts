@@ -27,6 +27,7 @@ export interface Pub {
   city: string;
   county: string;
   distanceTo: number;
+  distanceToNext?: number;
   facilities: string[];
   id: string;
   isAirport: boolean;
