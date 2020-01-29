@@ -8,16 +8,14 @@ import { findClosest } from '../lib/calc';
 import { GoogleApiWrapper, Map, Marker, Polyline } from 'google-maps-react';
 
 const App: React.FC = () => {
-
   const [locations, setLocations] = useState<Pub[]>([]);
+  const [bounds, setBounds] = useState<any>();
 
   useEffect(() => {
-
-    console.log('Loaded');
-
     const allPubs: Pub[] = _.flatten(_.flatten(_.map(apiData.regions, 'subRegions')).map(region => region.items)); // Fix this dumb shit
 
     navigator.geolocation.getCurrentPosition((position: Position) => {
+      const bounds = new google.maps.LatLngBounds();
       var latlon = new LatLon(position.coords.latitude, position.coords.longitude);
       const crawlPubs = [];
 
@@ -27,11 +25,13 @@ const App: React.FC = () => {
         console.log('Adding', next);
 
         crawlPubs.push(next);
+        bounds.extend(next);
 
         latlon = new LatLon(next.lat, next.lng)
       }
 
       setLocations(crawlPubs);
+      setBounds(bounds);
     });
   }, []);
 
@@ -40,7 +40,9 @@ const App: React.FC = () => {
       <div className="nav">Nav Menu</div>
       <Map
         google={ google }
+        mapTypeControl={ false }
         zoom={10}
+        bounds={ bounds }
         initialCenter={{
           lat: 51.5074,
           lng: 0.1278

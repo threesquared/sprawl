@@ -2,6 +2,7 @@
   "name": "sprawl",
   "version": "0.1.0",
   "private": true,
+  "homepage": "https://threesquared.github.io/sprawl",
   "dependencies": {
     "axios": "^0.19.2",
     "geodesy": "^2.2.0",
@@ -15,7 +16,9 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d build"
   },
   "eslintConfig": {
     "extends": "react-app"
@@ -43,6 +46,7 @@
     "@types/node": "^12.12.25",
     "@types/react": "^16.9.19",
     "@types/react-dom": "^16.9.5",
+    "gh-pages": "^2.2.0",
     "typescript": "~3.7.2"
   }
 }
