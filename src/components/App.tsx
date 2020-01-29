@@ -48,6 +48,7 @@ const App: React.FC = () => {
 
   return (
     <div className="app">
+      <a className="github-fork-ribbon" href="https://github.com/threesquared/sprawl" data-ribbon="Fork me on GitHub" title="Fork me on GitHub">Fork me on GitHub</a>
       <Nav
         setPubLimit={ setPubLimit }
         setDistanceLimit={ setDistanceLimit }
@@ -61,6 +62,7 @@ const App: React.FC = () => {
       <Map
         google={ google }
         mapTypeControl={ false }
+        fullscreenControl={ false }
         zoom={ 10 }
         onClick={ () => setActiveMarker(undefined) }
         onReady={ (props, map) => setMap(map) }
