@@ -1,7 +1,7 @@
 import React from 'react';
 import './Nav.css';
 
-const Nav: React.FC<{ mode: string, setMode: Function, setPubLimit: Function, setDistanceLimit: Function, geoLocate: Function }> = ({ mode, setMode, setPubLimit, setDistanceLimit, geoLocate }) => {
+const Nav: React.FC<{ mode: string, setMode: Function, setPubLimit: Function, setDistanceLimit: Function, geoLocate: Function, showAll: boolean; setShowAll: Function }> = ({ mode, setMode, setPubLimit, setDistanceLimit, geoLocate, showAll, setShowAll }) => {
 
   const getModeOptions = () => {
     if (mode === 'surprise') {
@@ -15,7 +15,7 @@ const Nav: React.FC<{ mode: string, setMode: Function, setPubLimit: Function, se
           <button type="button" onClick={ () => geoLocate() }>Set start to my current location</button>
           <br />
           <br />
-          <small>* Click on the map to set a start location<br />* Drag the red marker to change the start location</small>
+          <small>* Click on the map to set a start location<br />* Drag the red marker to change the location</small>
         </span>
       );
     }
@@ -41,6 +41,11 @@ const Nav: React.FC<{ mode: string, setMode: Function, setPubLimit: Function, se
         <br />
         <br />
         { getModeOptions() }
+        <br />
+        <br />
+        <label>
+          <input type="checkbox" onChange={ () => setShowAll(!showAll) } /><small>Show all other locations</small>
+        </label>
       </form>
     </div>
   );

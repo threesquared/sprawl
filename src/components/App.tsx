@@ -3,10 +3,10 @@ import LatLon from 'geodesy/latlon-spherical.js'
 import { GoogleApiWrapper, Map, Marker, Polyline, InfoWindow } from 'google-maps-react';
 import { nearestPubNextMethod, budgetShortestPathFistMethod } from '../lib/calc';
 import { getAllPubs, Pub } from '../lib/spoons';
-import icon from '../lib/icon';
 import Nav from './Nav';
 import PubInfo from './PubInfo';
 import CrawlInfo from './CrawlInfo';
+import pin from './pin.png';
 import './App.css';
 
 const App: React.FC = () => {
@@ -20,6 +20,7 @@ const App: React.FC = () => {
   const [map, setMap] = useState<google.maps.Map>();
   const [pubLimit, setPubLimit] = useState(10);
   const [distanceLimit, setDistanceLimit] = useState(10);
+  const [showAll, setShowAll] = useState(false);
 
   const allPubs = getAllPubs();
 
@@ -27,6 +28,37 @@ const App: React.FC = () => {
     navigator.geolocation.getCurrentPosition((position: Position) => {
       setStart(new LatLon(position.coords.latitude, position.coords.longitude));
     });
+  }
+
+  const getPubMarkers = () => {
+    let markers = pubs.map(pub => (
+      <Marker
+        key={ pub.id }
+        position={ pub }
+        icon={{
+          url: pin,
+          scaledSize: new google.maps.Size(27,39)
+        }}
+        onClick={ (props, marker) => {
+          setSelectedPub(pub);
+          setActiveMarker(marker);
+        } }
+      />
+    ));
+
+    if (showAll) {
+      markers= markers.concat(allPubs.filter(pub => !pubs.includes(pub)).map(pub => (
+        <Marker
+          key={ pub.id }
+          position={ pub }
+          icon={{
+            url: "http://maps.google.com/mapfiles/ms/icons/blue-dot.png"
+          }}
+        />
+      )));
+    }
+
+    return markers;
   }
 
   useEffect(() => {
@@ -55,6 +87,8 @@ const App: React.FC = () => {
         setPubLimit={ setPubLimit }
         setDistanceLimit={ setDistanceLimit }
         geoLocate={ geoLocate }
+        showAll={ showAll }
+        setShowAll={ setShowAll }
       />
       <CrawlInfo
         pubs={ pubs }
@@ -80,22 +114,7 @@ const App: React.FC = () => {
             onDragend={ (marker: any, event: any) => setStart(new LatLon(event.position.lat(), event.position.lng())) }
           />
         ) }
-        { pubs.map(pub => (
-          <Marker
-            key={ pub.id }
-            position={ pub }
-            icon={{
-              url: icon,
-              size: new google.maps.Size(200,200),
-              scaledSize: new google.maps.Size(32,32),
-              anchor: new google.maps.Point(16,32)
-            }}
-            onClick={ (props, marker) => {
-              setSelectedPub(pub);
-              setActiveMarker(marker);
-            } }
-          />
-        )) }
+        { getPubMarkers() }
         { end && (
           <Marker
             position={ end }
@@ -113,7 +132,6 @@ const App: React.FC = () => {
           google={ google }
           map={ map as google.maps.Map }
           marker={ activeMarker as google.maps.Marker }
-          pixelOffset={ new google.maps.Size(-85, 0) }
           visible={ activeMarker !== null }
         >
           { selectedPub && (

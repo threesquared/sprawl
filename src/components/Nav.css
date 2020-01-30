@@ -7,7 +7,7 @@
   padding: 0px 10px 10px 10px
 }
 
-input {
+input[type=number] {
   width: 50px;
   margin-left: 5px;
   margin-right: 5px;
