@@ -1,22 +1,22 @@
 {
   "files": {
     "main.css": "/sprawl/static/css/main.2bb3bdb8.chunk.css",
-    "main.js": "/sprawl/static/js/main.acb578e8.chunk.js",
-    "main.js.map": "/sprawl/static/js/main.acb578e8.chunk.js.map",
+    "main.js": "/sprawl/static/js/main.6d3bab85.chunk.js",
+    "main.js.map": "/sprawl/static/js/main.6d3bab85.chunk.js.map",
     "runtime-main.js": "/sprawl/static/js/runtime-main.0aeb0f6e.js",
     "runtime-main.js.map": "/sprawl/static/js/runtime-main.0aeb0f6e.js.map",
-    "static/js/2.d7a39f93.chunk.js": "/sprawl/static/js/2.d7a39f93.chunk.js",
-    "static/js/2.d7a39f93.chunk.js.map": "/sprawl/static/js/2.d7a39f93.chunk.js.map",
+    "static/js/2.eedafc5c.chunk.js": "/sprawl/static/js/2.eedafc5c.chunk.js",
+    "static/js/2.eedafc5c.chunk.js.map": "/sprawl/static/js/2.eedafc5c.chunk.js.map",
     "index.html": "/sprawl/index.html",
-    "precache-manifest.5702a6ae837d8d89ad8daa131c582c2a.js": "/sprawl/precache-manifest.5702a6ae837d8d89ad8daa131c582c2a.js",
+    "precache-manifest.99b79706fafd07033559b825e4e41133.js": "/sprawl/precache-manifest.99b79706fafd07033559b825e4e41133.js",
     "service-worker.js": "/sprawl/service-worker.js",
     "static/css/main.2bb3bdb8.chunk.css.map": "/sprawl/static/css/main.2bb3bdb8.chunk.css.map",
-    "static/js/2.d7a39f93.chunk.js.LICENSE": "/sprawl/static/js/2.d7a39f93.chunk.js.LICENSE"
+    "static/js/2.eedafc5c.chunk.js.LICENSE": "/sprawl/static/js/2.eedafc5c.chunk.js.LICENSE"
   },
   "entrypoints": [
     "static/js/runtime-main.0aeb0f6e.js",
-    "static/js/2.d7a39f93.chunk.js",
+    "static/js/2.eedafc5c.chunk.js",
     "static/css/main.2bb3bdb8.chunk.css",
-    "static/js/main.acb578e8.chunk.js"
+    "static/js/main.6d3bab85.chunk.js"
   ]
 }
