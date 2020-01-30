@@ -84,6 +84,8 @@ export function nearestPubNextMethod(start: LatLon, allPubs: Pub[], pubLimit: nu
   const availablePubs = allPubs;
 
   const bounds = new google.maps.LatLngBounds();
+  bounds.extend({ lat: start.lat, lng: start.lng });
+
   let nextPub = shiftClosestPub(start, availablePubs);
 
   for (let i=0; i < pubLimit; i++) {

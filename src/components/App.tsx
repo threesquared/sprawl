@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import LatLon from 'geodesy/latlon-spherical.js'
 import { GoogleApiWrapper, Map, Marker, Polyline, InfoWindow } from 'google-maps-react';
-import { nearestPubNextMethod, nearestTowardsEndNextMethod, Dijkstra } from '../lib/calc';
+import { nearestPubNextMethod, nearestTowardsEndNextMethod } from '../lib/calc';
 import { getAllPubs, Pub } from '../lib/spoons';
 import icon from '../lib/icon';
 import Nav from './Nav';
@@ -36,7 +36,6 @@ const App: React.FC = () => {
     }
 
     if (end) {
-
       let { crawlPubs, bounds } = nearestTowardsEndNextMethod(start, end, allPubs);
 
       setPubs(crawlPubs);
