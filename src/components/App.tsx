@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import LatLon from 'geodesy/latlon-spherical.js'
 import { GoogleApiWrapper, Map, Marker, Polyline, InfoWindow } from 'google-maps-react';
-import { nearestPubNextMethod, nearestTowardsEndNextMethod } from '../lib/calc';
+import { nearestPubNextMethod, budgetShortestPathFistMethod } from '../lib/calc';
 import { getAllPubs, Pub } from '../lib/spoons';
 import icon from '../lib/icon';
 import Nav from './Nav';
@@ -10,6 +10,7 @@ import CrawlInfo from './CrawlInfo';
 import './App.css';
 
 const App: React.FC = () => {
+  const [mode, setMode] = useState<string>('surprise');
   const [start, setStart] = useState<LatLon>();
   const [end, setEnd] = useState<LatLon>();
   const [pubs, setPubs] = useState<Pub[]>([]);
@@ -22,44 +23,42 @@ const App: React.FC = () => {
 
   const allPubs = getAllPubs();
 
-  useEffect(() => {
+  const geoLocate = () => {
     navigator.geolocation.getCurrentPosition((position: Position) => {
       setStart(new LatLon(position.coords.latitude, position.coords.longitude));
     });
-  }, []);
+  }
 
   useEffect(() => {
-    console.log('Generating crawl');
+    if (mode === 'line' && start && end) {
+      let { crawlPubs, bounds } = budgetShortestPathFistMethod(start, end, allPubs);
 
-    if (!start) {
-      return;
-    }
+      setPubs(crawlPubs);
+      setBounds(bounds);
+    } else if (mode === 'surprise' && start) {
+      const { crawlPubs, bounds } = nearestPubNextMethod(start, allPubs, pubLimit, distanceLimit);
 
-    if (end) {
-      let { crawlPubs, bounds } = nearestTowardsEndNextMethod(start, end, allPubs);
-
+      setEnd(undefined);
       setPubs(crawlPubs);
       setBounds(bounds);
     } else {
-      const { crawlPubs, bounds } = nearestPubNextMethod(start, allPubs, pubLimit, distanceLimit);
-
-      setPubs(crawlPubs);
-      setBounds(bounds);
+      setPubs([]);
     }
-  }, [start, end, pubLimit, distanceLimit]);
+  }, [mode, start, end, pubLimit, distanceLimit]);
 
   return (
     <div className="app">
       <a className="github-fork-ribbon" href="https://github.com/threesquared/sprawl" data-ribbon="Fork me on GitHub" title="Fork me on GitHub">Fork me on GitHub</a>
       <Nav
+        mode={ mode }
+        setMode={ setMode }
         setPubLimit={ setPubLimit }
         setDistanceLimit={ setDistanceLimit }
+        geoLocate={ geoLocate }
       />
-      { pubs.length && (
-        <CrawlInfo
-          pubs={ pubs }
-        />
-      ) }
+      <CrawlInfo
+        pubs={ pubs }
+      />
       <Map
         google={ google }
         mapTypeControl={ false }

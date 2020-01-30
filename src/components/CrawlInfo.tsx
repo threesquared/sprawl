@@ -4,6 +4,10 @@ import { metersToMiles } from '../lib/calc';
 import './CrawlInfo.css';
 
 const CrawlInfo: React.FC<{ pubs: Pub[] }> = ({ pubs }) => {
+  if (pubs.length === 0) {
+    return null;
+  }
+
   const totalDistance = pubs.reduce((total, pub) => pub.distanceToNext ? total + pub.distanceToNext : total, 0);
   const dest = pubs[pubs.length-1];
   const waypoints = pubs.map(pub => `${pub.lat},${pub.lng}`).join('|');

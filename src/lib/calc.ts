@@ -116,11 +116,13 @@ export function nearestPubNextMethod(start: LatLon, allPubs: Pub[], pubLimit: nu
  * @param pubLimit
  * @param distanceLimit
  */
-export function nearestTowardsEndNextMethod(start: LatLon, end: LatLon, allPubs: Pub[]) {
+export function budgetShortestPathFistMethod(start: LatLon, end: LatLon, allPubs: Pub[]) {
   const crawlPubs = [];
   const availablePubs = allPubs;
 
   const bounds = new google.maps.LatLngBounds();
+  bounds.extend({ lat: start.lat, lng: start.lng });
+  bounds.extend({ lat: end.lat, lng: end.lng });
 
   const startPub = shiftClosestPub(start, availablePubs);
   crawlPubs.push(startPub);
@@ -132,7 +134,7 @@ export function nearestTowardsEndNextMethod(start: LatLon, end: LatLon, allPubs:
 
   console.log('End', endPub);
 
-  let testPubs = getClosestPubs(start, availablePubs);
+  let testPubs = getClosestPubs(start, availablePubs, 20);
   let nextPub = shiftClosestPub(end, testPubs);
   _.remove(availablePubs, pub => pub.id === nextPub.id);
   console.log('Next', nextPub);
@@ -141,7 +143,7 @@ export function nearestTowardsEndNextMethod(start: LatLon, end: LatLon, allPubs:
     crawlPubs.push(nextPub);
     bounds.extend(nextPub);
 
-    testPubs = getClosestPubs(new LatLon(nextPub.lat, nextPub.lng), availablePubs);
+    testPubs = getClosestPubs(new LatLon(nextPub.lat, nextPub.lng), availablePubs, 20);
     nextPub = shiftClosestPub(end, testPubs);
     console.log('Next', nextPub);
     _.remove(availablePubs, pub => pub.id === nextPub.id);
