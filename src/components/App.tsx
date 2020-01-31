@@ -86,11 +86,10 @@ const App: React.FC = () => {
         const [savedStart, savedEnd] = JSON.parse(new Buffer(window.location.hash.substring(1), 'base64').toString('ascii'));
 
         if (savedEnd){
-          setEnd(new LatLng(savedEnd.lat, savedEnd.lng));
+          setEnd(new LatLng(savedEnd[0], savedEnd[1]));
         }
 
-        setStart(new LatLng(savedStart.lat, savedStart.lng));
-
+        setStart(new LatLng(savedStart[0], savedStart[1]));
       } catch(e) {
         alert('Sorry, could not parse that saved url')
       }

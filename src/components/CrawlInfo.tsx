@@ -4,7 +4,7 @@ import { metersToMiles, LatLng } from '../lib/distance';
 import './CrawlInfo.css';
 
 const CrawlInfo: React.FC<{ pubs: Pub[], start?: LatLng, end?: LatLng }> = ({ pubs, start, end }) => {
-  if (pubs.length === 0) {
+  if (pubs.length === 0 || !start) {
     return null;
   }
 
@@ -13,8 +13,14 @@ const CrawlInfo: React.FC<{ pubs: Pub[], start?: LatLng, end?: LatLng }> = ({ pu
   const waypoints = pubs.map(pub => `${pub.lat},${pub.lng}`).join('|');
 
   const saveObject = [
-    start ? start.toJSON() : null,
-    end ? end.toJSON() : null
+    [
+      +start.lat.toFixed(4),
+      +start.lng.toFixed(4)
+    ],
+    end ? [
+      +end.lat.toFixed(4),
+      +end.lng.toFixed(4)
+    ] : null
   ]
 
   const saveData = new Buffer(JSON.stringify(saveObject)).toString('base64');
