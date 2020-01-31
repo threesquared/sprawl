@@ -1,9 +1,9 @@
 import React from 'react';
 import { Pub } from '../lib/spoons';
-import { metersToMiles } from '../lib/distance';
+import { metersToMiles, LatLng } from '../lib/distance';
 import './CrawlInfo.css';
 
-const CrawlInfo: React.FC<{ pubs: Pub[], start?: google.maps.LatLng, end?: google.maps.LatLng }> = ({ pubs, start, end }) => {
+const CrawlInfo: React.FC<{ pubs: Pub[], start?: LatLng, end?: LatLng }> = ({ pubs, start, end }) => {
   if (pubs.length === 0) {
     return null;
   }

@@ -1,7 +1,8 @@
 import React from 'react';
 import { Pub } from '../lib/spoons';
+import { LatLng } from '../lib/distance';
 
-const PubInfo: React.FC<{ pub?: Pub, start?: google.maps.LatLng }> = ({ pub, start }) => {
+const PubInfo: React.FC<{ pub?: Pub, start?: LatLng }> = ({ pub, start }) => {
   if (!pub) {
     return null;
   }

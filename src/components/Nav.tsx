@@ -12,7 +12,7 @@ const Nav: React.FC<{ setPubLimit: Function, setDistanceLimit: Function, geoLoca
           pubs <br /> and end up at most
           <input type="number" placeholder="10" onChange={ event => setDistanceLimit(parseInt(event.target.value) || 10) } name="distanceLimit" /> miles away
           <br />
-          <button type="button" onClick={ () => geoLocate() }>Start from my current location</button>
+          <button type="button" onClick={ () => geoLocate() }>Set start to my current location</button>
           <br />
           <br />
           <small>* Left click on the map to set a start location<br />* Right click to set an optional end location<br />* Drag the red markers to change the locations</small>

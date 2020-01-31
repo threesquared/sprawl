@@ -1,6 +1,7 @@
 import _ from 'lodash';
+import { computeDistanceBetween } from 'spherical-geometry-js';
 import { Pub } from '../lib/spoons';
-import { milesToMeters } from './distance';
+import { milesToMeters, LatLng } from './distance';
 
 export default class CrawlCalculator {
   /**
@@ -11,12 +12,12 @@ export default class CrawlCalculator {
   /**
    * Start location
    */
-  public start: google.maps.LatLng;
+  public start: LatLng;
 
   /**
    * Optional end location
    */
-  public end?: google.maps.LatLng;
+  public end?: LatLng;
 
   /**
    * Create a new pub crawl calculator.
@@ -24,7 +25,7 @@ export default class CrawlCalculator {
    * @param pubs
    * @param start
    */
-  public constructor(pubs: Pub[], start: google.maps.LatLng) {
+  public constructor(pubs: Pub[], start: LatLng) {
     this.pubs = pubs;
     this.start = start;
   }
@@ -34,7 +35,7 @@ export default class CrawlCalculator {
    *
    * @param end
    */
-  public setEnd(end: google.maps.LatLng) {
+  public setEnd(end: LatLng) {
     this.end = end;
   }
 
@@ -67,13 +68,11 @@ export default class CrawlCalculator {
     let nextPub = this.shiftClosestPub(this.start, availablePubs);
 
     for (let i=0; i < pubLimit; i++) {
-      console.log('Adding', nextPub);
-
       crawlPubs.push(nextPub);
 
-      nextPub = this.shiftClosestPub(new google.maps.LatLng(nextPub.lat, nextPub.lng), availablePubs);
+      nextPub = this.shiftClosestPub(new LatLng(nextPub.lat, nextPub.lng), availablePubs);
 
-      if(google.maps.geometry.spherical.computeDistanceBetween(this.start, new google.maps.LatLng(nextPub.lat, nextPub.lng)) > milesToMeters(distanceLimit)) {
+      if(computeDistanceBetween(this.start, new LatLng(nextPub.lat, nextPub.lng)) > milesToMeters(distanceLimit)) {
         break;
       }
     }
@@ -100,23 +99,18 @@ export default class CrawlCalculator {
     const startPub = this.shiftClosestPub(this.start, availablePubs);
     crawlPubs.push(startPub);
 
-    console.log('Start', startPub);
-
     const endPub = this.getClosestPub(this.end, availablePubs);
-
-    console.log('End', endPub);
 
     let testPubs = this.getClosestPubs(this.start, availablePubs, 5);
     let nextPub = this.shiftClosestPub(this.end, testPubs);
     _.remove(availablePubs, pub => pub.id === nextPub.id);
-    console.log('Next', nextPub);
 
     while (nextPub.id !== endPub.id) {
       crawlPubs.push(nextPub);
 
-      testPubs = this.getClosestPubs(new google.maps.LatLng(nextPub.lat, nextPub.lng), availablePubs, 5);
+      testPubs = this.getClosestPubs(new LatLng(nextPub.lat, nextPub.lng), availablePubs, 5);
       nextPub = this.shiftClosestPub(this.end, testPubs);
-      console.log('Next', nextPub);
+
       _.remove(availablePubs, pub => pub.id === nextPub.id);
     }
 
@@ -131,10 +125,10 @@ export default class CrawlCalculator {
    * @param start
    * @param pubs
    */
-  private sortPubsByDistanceTo(start: google.maps.LatLng, pubs: Pub[]): void {
+  private sortPubsByDistanceTo(start: LatLng, pubs: Pub[]): void {
     pubs.sort((a, b) => {
-      a.distanceToNext = google.maps.geometry.spherical.computeDistanceBetween(start, new google.maps.LatLng(Number(a.lat), Number(a.lng)));
-      b.distanceToNext = google.maps.geometry.spherical.computeDistanceBetween(start, new google.maps.LatLng(Number(b.lat), Number(b.lng)));
+      a.distanceToNext = computeDistanceBetween(start, new LatLng(Number(a.lat), Number(a.lng)));
+      b.distanceToNext = computeDistanceBetween(start, new LatLng(Number(b.lat), Number(b.lng)));
 
       return a.distanceToNext - b.distanceToNext;
     });
@@ -146,7 +140,7 @@ export default class CrawlCalculator {
    * @param start
    * @param pubs
    */
-  private shiftClosestPub(start: google.maps.LatLng, pubs: Pub[]): Pub {
+  private shiftClosestPub(start: LatLng, pubs: Pub[]): Pub {
     this.sortPubsByDistanceTo(start, pubs);
 
     return pubs.shift() as Pub;
@@ -158,7 +152,7 @@ export default class CrawlCalculator {
    * @param start
    * @param pubs
    */
-  private getClosestPub(start: google.maps.LatLng, pubs: Pub[]): Pub {
+  private getClosestPub(start: LatLng, pubs: Pub[]): Pub {
     this.sortPubsByDistanceTo(start, pubs);
 
     return pubs[0];
@@ -170,7 +164,7 @@ export default class CrawlCalculator {
    * @param start
    * @param pubs
    */
-  private getClosestPubs(start: google.maps.LatLng, pubs: Pub[], limit: number = 10): Pub[] {
+  private getClosestPubs(start: LatLng, pubs: Pub[], limit: number = 10): Pub[] {
     this.sortPubsByDistanceTo(start, pubs);
 
     return pubs.slice(0, limit);

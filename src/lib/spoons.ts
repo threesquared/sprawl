@@ -1,8 +1,9 @@
 import axios from 'axios';
 import _ from 'lodash';
 import apiData from '../spoons.json';
+import { LatLng } from './distance.js';
 
-export async function findPubs(location: google.maps.LatLng): Promise<Pub[]> {
+export async function findPubs(location: LatLng): Promise<Pub[]> {
   const response = await axios.post<{ results: Pub[] }>('https://www.jdwetherspoon.com/api/advancedsearch', {
     location,
     paging: {

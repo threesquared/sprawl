@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { GoogleApiWrapper, Map, Marker, InfoWindow, Polyline } from 'google-maps-react';
 import { getAllPubs, Pub } from '../lib/spoons';
+import { LatLng } from '../lib/distance';
 import CrawlCalculator from '../lib/CrawlCalculator';
 import Nav from './Nav';
 import PubInfo from './PubInfo';
@@ -9,8 +10,8 @@ import pin from './pin.png';
 import './App.css';
 
 const App: React.FC = () => {
-  const [start, setStart] = useState<google.maps.LatLng>();
-  const [end, setEnd] = useState<google.maps.LatLng>();
+  const [start, setStart] = useState<LatLng>();
+  const [end, setEnd] = useState<LatLng>();
   const [pubs, setPubs] = useState<Pub[]>([]);
   const [bounds, setBounds] = useState<google.maps.LatLngBounds>();
   const [activeMarker, setActiveMarker] = useState<google.maps.Marker>();
@@ -24,7 +25,7 @@ const App: React.FC = () => {
 
   const geoLocate = () => {
     navigator.geolocation.getCurrentPosition((position: Position) => {
-      setStart(new google.maps.LatLng(position.coords.latitude, position.coords.longitude));
+      setStart(new LatLng(position.coords.latitude, position.coords.longitude));
     });
   }
 
@@ -64,7 +65,7 @@ const App: React.FC = () => {
   }
 
   const getCrawlPath = () => {
-    const path: (google.maps.LatLngLiteral | google.maps.LatLng)[] = [];
+    const path: (google.maps.LatLngLiteral)[] = [];
 
     if (start) {
       path.push(start);
@@ -85,15 +86,16 @@ const App: React.FC = () => {
         const [savedStart, savedEnd] = JSON.parse(new Buffer(window.location.hash.substring(1), 'base64').toString('ascii'));
 
         if (savedEnd){
-          setEnd(new google.maps.LatLng(savedEnd));
+          setEnd(new LatLng(savedEnd.lat, savedEnd.lng));
         }
 
-        setStart(new google.maps.LatLng(savedStart));
-
+        setStart(new LatLng(savedStart.lat, savedStart.lng));
 
       } catch(e) {
         alert('Sorry, could not parse that saved url')
       }
+    } else {
+      geoLocate();
     }
   }, []);
 
@@ -101,8 +103,6 @@ const App: React.FC = () => {
     if (start) {
       const bounds = new google.maps.LatLngBounds();
       bounds.extend(start);
-
-      console.log(start.toJSON());
 
       const calculator = new CrawlCalculator(allPubs, start);
 
@@ -141,8 +141,8 @@ const App: React.FC = () => {
         mapTypeControl={ false }
         fullscreenControl={ false }
         zoom={ 10 }
-        onClick={ (props, map, event) => setStart(new google.maps.LatLng(event.latLng.lat(), event.latLng.lng())) }
-        onRightclick={ (props, map, event) => setEnd(new google.maps.LatLng(event.latLng.lat(), event.latLng.lng())) }
+        onClick={ (props, map, event) => setStart(new LatLng(event.latLng.lat(), event.latLng.lng())) }
+        onRightclick={ (props, map, event) => setEnd(new LatLng(event.latLng.lat(), event.latLng.lng())) }
         onReady={ (props, map) => setMap(map) }
         bounds={ bounds }
         initialCenter={{
@@ -154,7 +154,7 @@ const App: React.FC = () => {
           <Marker
             position={ start }
             draggable={ true }
-            onDragend={ (marker: any, event: any) => setStart(new google.maps.LatLng(event.position.lat(), event.position.lng())) }
+            onDragend={ (marker: any, event: any) => setStart(new LatLng(event.position.lat(), event.position.lng())) }
             onClick={ () => setStart(undefined) }
           />
         ) }
@@ -163,7 +163,7 @@ const App: React.FC = () => {
           <Marker
             position={ end }
             draggable={ true }
-            onDragend={ (marker: any, event: any) => setEnd(new google.maps.LatLng(event.position.lat(), event.position.lng())) }
+            onDragend={ (marker: any, event: any) => setEnd(new LatLng(event.position.lat(), event.position.lng())) }
             onClick={ () => setEnd(undefined) }
           />
         ) }
