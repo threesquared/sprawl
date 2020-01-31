@@ -1,11 +1,11 @@
 import React from 'react';
 import './Nav.css';
 
-const Nav: React.FC<{ mode: string, setMode: Function, setPubLimit: Function, setDistanceLimit: Function, geoLocate: Function, showAll: boolean; setShowAll: Function }> = ({ mode, setMode, setPubLimit, setDistanceLimit, geoLocate, showAll, setShowAll }) => {
-
-  const getModeOptions = () => {
-    if (mode === 'surprise') {
-      return (
+const Nav: React.FC<{ setPubLimit: Function, setDistanceLimit: Function, geoLocate: Function, showAll: boolean; setShowAll: Function }> = ({ setPubLimit, setDistanceLimit, geoLocate, showAll, setShowAll }) => {
+  return (
+    <div className="nav">
+      <h3>Spoons Pub Crawl Generator</h3>
+      <form>
         <span>
           I want to visit up to
           <input type="number" placeholder="10" onChange={ event => setPubLimit(parseInt(event.target.value) || 10) } name="pubLimit" />
@@ -15,32 +15,8 @@ const Nav: React.FC<{ mode: string, setMode: Function, setPubLimit: Function, se
           <button type="button" onClick={ () => geoLocate() }>Start from my current location</button>
           <br />
           <br />
-          <small>* Click on the map to set a start location<br />* Drag the red marker to change the location</small>
+          <small>* Left click on the map to set a start location<br />* Right click to set an optional end location<br />* Drag the red markers to change the locations</small>
         </span>
-      );
-    }
-
-    if (mode === 'line') {
-      return (
-        <span>
-          <small>* Left click to set a start location<br />* Right click to set an end location<br />* Drag red markers to change locations</small>
-        </span>
-      );
-    }
-  }
-
-  return (
-    <div className="nav">
-      <h3>Spoons Pub Crawl Generator</h3>
-      <form>
-        Mode<br />
-        <select onChange={ event => setMode(event.target.value) }>
-          <option value="surprise">Surprise me</option>
-          <option value="line">Select start and end</option>
-        </select>
-        <br />
-        <br />
-        { getModeOptions() }
         <br />
         <br />
         <label>

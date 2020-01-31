@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { GoogleApiWrapper, Map, Marker, InfoWindow, Polyline } from 'google-maps-react';
-import { nearestPubNextMethod, budgetShortestPathFistMethod } from '../lib/calc';
 import { getAllPubs, Pub } from '../lib/spoons';
+import CrawlCalculator from '../lib/CrawlCalculator';
 import Nav from './Nav';
 import PubInfo from './PubInfo';
 import CrawlInfo from './CrawlInfo';
@@ -9,7 +9,6 @@ import pin from './pin.png';
 import './App.css';
 
 const App: React.FC = () => {
-  const [mode, setMode] = useState<string>('surprise');
   const [start, setStart] = useState<google.maps.LatLng>();
   const [end, setEnd] = useState<google.maps.LatLng>();
   const [pubs, setPubs] = useState<Pub[]>([]);
@@ -86,7 +85,6 @@ const App: React.FC = () => {
         const [savedStart, savedEnd] = JSON.parse(new Buffer(window.location.hash.substring(1), 'base64').toString('ascii'));
 
         if (savedEnd){
-          setMode('line');
           setEnd(new google.maps.LatLng(savedEnd));
         }
 
@@ -100,28 +98,33 @@ const App: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    if (mode === 'line' && start && end) {
-      let { crawlPubs, bounds } = budgetShortestPathFistMethod(start, end, allPubs);
+    if (start) {
+      const bounds = new google.maps.LatLngBounds();
+      bounds.extend(start);
 
-      setPubs(crawlPubs);
-      setBounds(bounds);
-    } else if (mode === 'surprise' && start) {
-      const { crawlPubs, bounds } = nearestPubNextMethod(start, allPubs, pubLimit, distanceLimit);
+      console.log(start.toJSON());
 
-      setEnd(undefined);
-      setPubs(crawlPubs);
+      const calculator = new CrawlCalculator(allPubs, start);
+
+      if (end) {
+        bounds.extend(end);
+        calculator.setEnd(end);
+      }
+
+      const crawlPubs = calculator.getCrawlPubs(pubLimit, distanceLimit);
+      crawlPubs.forEach(pub => bounds.extend(pub));
+
       setBounds(bounds);
+      setPubs(crawlPubs);
     } else {
       setPubs([]);
     }
-  }, [mode, start, end, pubLimit, distanceLimit]);
+  }, [start, end, pubLimit, distanceLimit]);
 
   return (
     <div className="app">
       <a className="github-fork-ribbon" href="https://github.com/threesquared/sprawl" data-ribbon="Fork me on GitHub" title="Fork me on GitHub">Fork me on GitHub</a>
       <Nav
-        mode={ mode }
-        setMode={ setMode }
         setPubLimit={ setPubLimit }
         setDistanceLimit={ setDistanceLimit }
         geoLocate={ geoLocate }
@@ -152,6 +155,7 @@ const App: React.FC = () => {
             position={ start }
             draggable={ true }
             onDragend={ (marker: any, event: any) => setStart(new google.maps.LatLng(event.position.lat(), event.position.lng())) }
+            onClick={ () => setStart(undefined) }
           />
         ) }
         { getPubMarkers() }
@@ -160,6 +164,7 @@ const App: React.FC = () => {
             position={ end }
             draggable={ true }
             onDragend={ (marker: any, event: any) => setEnd(new google.maps.LatLng(event.position.lat(), event.position.lng())) }
+            onClick={ () => setEnd(undefined) }
           />
         ) }
         <Polyline

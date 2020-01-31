@@ -1,6 +1,6 @@
 import React from 'react';
 import { Pub } from '../lib/spoons';
-import { metersToMiles } from '../lib/calc';
+import { metersToMiles } from '../lib/distance';
 import './CrawlInfo.css';
 
 const CrawlInfo: React.FC<{ pubs: Pub[], start?: google.maps.LatLng, end?: google.maps.LatLng }> = ({ pubs, start, end }) => {
