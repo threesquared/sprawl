@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import LatLon from 'geodesy/latlon-spherical.js'
-import { GoogleApiWrapper, Map, Marker, Polyline, InfoWindow } from 'google-maps-react';
+import { GoogleApiWrapper, Map, Marker, InfoWindow, Polyline } from 'google-maps-react';
 import { nearestPubNextMethod, budgetShortestPathFistMethod } from '../lib/calc';
 import { getAllPubs, Pub } from '../lib/spoons';
 import Nav from './Nav';
@@ -11,8 +10,8 @@ import './App.css';
 
 const App: React.FC = () => {
   const [mode, setMode] = useState<string>('surprise');
-  const [start, setStart] = useState<LatLon>();
-  const [end, setEnd] = useState<LatLon>();
+  const [start, setStart] = useState<google.maps.LatLng>();
+  const [end, setEnd] = useState<google.maps.LatLng>();
   const [pubs, setPubs] = useState<Pub[]>([]);
   const [bounds, setBounds] = useState<google.maps.LatLngBounds>();
   const [activeMarker, setActiveMarker] = useState<google.maps.Marker>();
@@ -26,7 +25,7 @@ const App: React.FC = () => {
 
   const geoLocate = () => {
     navigator.geolocation.getCurrentPosition((position: Position) => {
-      setStart(new LatLon(position.coords.latitude, position.coords.longitude));
+      setStart(new google.maps.LatLng(position.coords.latitude, position.coords.longitude));
     });
   }
 
@@ -54,12 +53,51 @@ const App: React.FC = () => {
           icon={{
             url: "http://maps.google.com/mapfiles/ms/icons/blue-dot.png"
           }}
+          onClick={ (props, marker) => {
+            setSelectedPub(pub);
+            setActiveMarker(marker);
+          } }
         />
       )));
     }
 
     return markers;
   }
+
+  const getCrawlPath = () => {
+    const path: (google.maps.LatLngLiteral | google.maps.LatLng)[] = [];
+
+    if (start) {
+      path.push(start);
+    }
+
+    path.push(...pubs);
+
+    if (end) {
+      path.push(end);
+    }
+
+    return path;
+  }
+
+  useEffect(() => {
+    if (window.location.hash) {
+      try {
+        const [savedStart, savedEnd] = JSON.parse(new Buffer(window.location.hash.substring(1), 'base64').toString('ascii'));
+
+        if (savedEnd){
+          setMode('line');
+          setEnd(new google.maps.LatLng(savedEnd));
+        }
+
+        setStart(new google.maps.LatLng(savedStart));
+
+
+      } catch(e) {
+        alert('Sorry, could not parse that saved url')
+      }
+    }
+  }, []);
 
   useEffect(() => {
     if (mode === 'line' && start && end) {
@@ -92,14 +130,16 @@ const App: React.FC = () => {
       />
       <CrawlInfo
         pubs={ pubs }
+        start={ start }
+        end={ end }
       />
       <Map
         google={ google }
         mapTypeControl={ false }
         fullscreenControl={ false }
         zoom={ 10 }
-        onClick={ (props, map, event) => setStart(new LatLon(event.latLng.lat(), event.latLng.lng())) }
-        onRightclick={ (props, map, event) => setEnd(new LatLon(event.latLng.lat(), event.latLng.lng())) }
+        onClick={ (props, map, event) => setStart(new google.maps.LatLng(event.latLng.lat(), event.latLng.lng())) }
+        onRightclick={ (props, map, event) => setEnd(new google.maps.LatLng(event.latLng.lat(), event.latLng.lng())) }
         onReady={ (props, map) => setMap(map) }
         bounds={ bounds }
         initialCenter={{
@@ -111,7 +151,7 @@ const App: React.FC = () => {
           <Marker
             position={ start }
             draggable={ true }
-            onDragend={ (marker: any, event: any) => setStart(new LatLon(event.position.lat(), event.position.lng())) }
+            onDragend={ (marker: any, event: any) => setStart(new google.maps.LatLng(event.position.lat(), event.position.lng())) }
           />
         ) }
         { getPubMarkers() }
@@ -119,11 +159,11 @@ const App: React.FC = () => {
           <Marker
             position={ end }
             draggable={ true }
-            onDragend={ (marker: any, event: any) => setEnd(new LatLon(event.position.lat(), event.position.lng())) }
+            onDragend={ (marker: any, event: any) => setEnd(new google.maps.LatLng(event.position.lat(), event.position.lng())) }
           />
         ) }
         <Polyline
-          path={ pubs }
+          path={ getCrawlPath() }
           strokeColor="#0000FF"
           strokeOpacity={ 0.8 }
           strokeWeight={ 2 }
@@ -134,12 +174,10 @@ const App: React.FC = () => {
           marker={ activeMarker as google.maps.Marker }
           visible={ activeMarker !== null }
         >
-          { selectedPub && (
-            <PubInfo
-              pub={ selectedPub }
-              start={ start }
-            />
-          ) }
+          <PubInfo
+            pub={ selectedPub }
+            start={ start }
+          />
         </InfoWindow>
       </Map>
     </div>
@@ -147,5 +185,9 @@ const App: React.FC = () => {
 }
 
 export default GoogleApiWrapper({
-  apiKey: process.env.REACT_APP_GOOGLE_API_KEY as string
+  apiKey: process.env.REACT_APP_GOOGLE_API_KEY as string,
+  libraries: [
+    'geometry',
+    'places'
+  ]
 })(App)

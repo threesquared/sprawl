@@ -1,9 +1,8 @@
 import axios from 'axios';
 import _ from 'lodash';
-import LatLon from 'geodesy/latlon-spherical.js'
 import apiData from '../spoons.json';
 
-export async function findPubs(location: LatLon): Promise<Pub[]> {
+export async function findPubs(location: google.maps.LatLng): Promise<Pub[]> {
   const response = await axios.post<{ results: Pub[] }>('https://www.jdwetherspoon.com/api/advancedsearch', {
     location,
     paging: {

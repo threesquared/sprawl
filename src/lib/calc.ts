@@ -1,5 +1,4 @@
 import _ from 'lodash';
-import LatLon from 'geodesy/latlon-spherical.js'
 import { Pub } from './spoons';
 
 /**
@@ -8,10 +7,10 @@ import { Pub } from './spoons';
  * @param start
  * @param pubs
  */
-export function sortPubsByDistanceTo(start: LatLon, pubs: Pub[]): void {
+export function sortPubsByDistanceTo(start: google.maps.LatLng, pubs: Pub[]): void {
   pubs.sort((a, b) => {
-    a.distanceToNext = start.distanceTo(new LatLon(Number(a.lat), Number(a.lng)));
-    b.distanceToNext = start.distanceTo(new LatLon(Number(b.lat), Number(b.lng)));
+    a.distanceToNext = google.maps.geometry.spherical.computeDistanceBetween(start, new google.maps.LatLng(Number(a.lat), Number(a.lng)));
+    b.distanceToNext = google.maps.geometry.spherical.computeDistanceBetween(start, new google.maps.LatLng(Number(b.lat), Number(b.lng)));
 
     return a.distanceToNext - b.distanceToNext;
   });
@@ -23,7 +22,7 @@ export function sortPubsByDistanceTo(start: LatLon, pubs: Pub[]): void {
  * @param start
  * @param pubs
  */
-export function shiftClosestPub(start: LatLon, pubs: Pub[]): Pub {
+export function shiftClosestPub(start: google.maps.LatLng, pubs: Pub[]): Pub {
   sortPubsByDistanceTo(start, pubs);
 
   return pubs.shift() as Pub;
@@ -35,7 +34,7 @@ export function shiftClosestPub(start: LatLon, pubs: Pub[]): Pub {
  * @param start
  * @param pubs
  */
-export function getClosestPub(start: LatLon, pubs: Pub[]): Pub {
+export function getClosestPub(start: google.maps.LatLng, pubs: Pub[]): Pub {
   sortPubsByDistanceTo(start, pubs);
 
   return pubs[0];
@@ -47,7 +46,7 @@ export function getClosestPub(start: LatLon, pubs: Pub[]): Pub {
  * @param start
  * @param pubs
  */
-export function getClosestPubs(start: LatLon, pubs: Pub[], limit: number = 10): Pub[] {
+export function getClosestPubs(start: google.maps.LatLng, pubs: Pub[], limit: number = 10): Pub[] {
   sortPubsByDistanceTo(start, pubs);
 
   return pubs.slice(0, limit);
@@ -79,12 +78,12 @@ export function milesToMeters(distance: number) {
  * @param pubLimit
  * @param distanceLimit
  */
-export function nearestPubNextMethod(start: LatLon, allPubs: Pub[], pubLimit: number, distanceLimit: number) {
+export function nearestPubNextMethod(start: google.maps.LatLng, allPubs: Pub[], pubLimit: number, distanceLimit: number) {
   const crawlPubs = [];
   const availablePubs = allPubs;
 
   const bounds = new google.maps.LatLngBounds();
-  bounds.extend({ lat: start.lat, lng: start.lng });
+  bounds.extend(start);
 
   let nextPub = shiftClosestPub(start, availablePubs);
 
@@ -95,9 +94,9 @@ export function nearestPubNextMethod(start: LatLon, allPubs: Pub[], pubLimit: nu
 
     bounds.extend(nextPub);
 
-    nextPub = shiftClosestPub(new LatLon(nextPub.lat, nextPub.lng), availablePubs);
+    nextPub = shiftClosestPub(new google.maps.LatLng(nextPub.lat, nextPub.lng), availablePubs);
 
-    if(start.distanceTo(new LatLon(nextPub.lat, nextPub.lng)) > milesToMeters(distanceLimit)) {
+    if(google.maps.geometry.spherical.computeDistanceBetween(start, new google.maps.LatLng(nextPub.lat, nextPub.lng)) > milesToMeters(distanceLimit)) {
       break;
     }
   }
@@ -116,13 +115,13 @@ export function nearestPubNextMethod(start: LatLon, allPubs: Pub[], pubLimit: nu
  * @param pubLimit
  * @param distanceLimit
  */
-export function budgetShortestPathFistMethod(start: LatLon, end: LatLon, allPubs: Pub[]) {
+export function budgetShortestPathFistMethod(start: google.maps.LatLng, end: google.maps.LatLng, allPubs: Pub[]) {
   const crawlPubs = [];
   const availablePubs = allPubs;
 
   const bounds = new google.maps.LatLngBounds();
-  bounds.extend({ lat: start.lat, lng: start.lng });
-  bounds.extend({ lat: end.lat, lng: end.lng });
+  bounds.extend(start);
+  bounds.extend(end);
 
   const startPub = shiftClosestPub(start, availablePubs);
   crawlPubs.push(startPub);
@@ -143,7 +142,7 @@ export function budgetShortestPathFistMethod(start: LatLon, end: LatLon, allPubs
     crawlPubs.push(nextPub);
     bounds.extend(nextPub);
 
-    testPubs = getClosestPubs(new LatLon(nextPub.lat, nextPub.lng), availablePubs, 20);
+    testPubs = getClosestPubs(new google.maps.LatLng(nextPub.lat, nextPub.lng), availablePubs, 20);
     nextPub = shiftClosestPub(end, testPubs);
     console.log('Next', nextPub);
     _.remove(availablePubs, pub => pub.id === nextPub.id);

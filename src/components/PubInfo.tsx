@@ -1,8 +1,11 @@
 import React from 'react';
-import LatLon from 'geodesy/latlon-spherical.js'
 import { Pub } from '../lib/spoons';
 
-const PubInfo: React.FC<{ pub: Pub, start?: LatLon }> = ({ pub, start }) => {
+const PubInfo: React.FC<{ pub?: Pub, start?: google.maps.LatLng }> = ({ pub, start }) => {
+  if (!pub) {
+    return null;
+  }
+
   return (
     <div>
       <h3>{ pub.name }</h3>
