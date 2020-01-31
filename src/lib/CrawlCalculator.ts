@@ -10,6 +10,11 @@ export default class CrawlCalculator {
   public pubs: Pub[];
 
   /**
+   * List of pubs on this crawl
+   */
+  public crawl: Pub[] = [];
+
+  /**
    * Start location
    */
   public start: LatLng;
@@ -47,7 +52,7 @@ export default class CrawlCalculator {
    */
   public getCrawlPubs(pubLimit: number, distanceLimit: number) {
     if (this.end) {
-      return this.budgetShortestPathFistMethod(pubLimit, distanceLimit);
+      return this.budgetShortestPathFirstMethod(pubLimit, distanceLimit);
     }
 
     return this.nearestPubNextMethod(pubLimit, distanceLimit);
@@ -62,22 +67,19 @@ export default class CrawlCalculator {
    * @param distanceLimit
    */
   private nearestPubNextMethod(pubLimit: number, distanceLimit: number) {
-    const crawlPubs = [];
-    const availablePubs = this.pubs;
-
-    let nextPub = this.shiftClosestPub(this.start, availablePubs);
+    let nextPub = this.shiftClosestPub(this.start, this.pubs);
 
     for (let i=0; i < pubLimit; i++) {
-      crawlPubs.push(nextPub);
+      this.crawl.push(nextPub);
 
-      nextPub = this.shiftClosestPub(new LatLng(nextPub.lat, nextPub.lng), availablePubs);
+      nextPub = this.shiftClosestPub(new LatLng(nextPub.lat, nextPub.lng), this.pubs);
 
       if(computeDistanceBetween(this.start, new LatLng(nextPub.lat, nextPub.lng)) > milesToMeters(distanceLimit)) {
         break;
       }
     }
 
-    return crawlPubs;
+    return this.crawl;
   }
 
   /**
@@ -88,35 +90,32 @@ export default class CrawlCalculator {
    * @param pubLimit
    * @param distanceLimit
    */
-  private budgetShortestPathFistMethod(pubLimit: number, distanceLimit: number) {
+  private budgetShortestPathFirstMethod(pubLimit: number, distanceLimit: number) {
     if (!this.end) {
       return []
     }
 
-    const crawlPubs = [];
-    const availablePubs = this.pubs;
+    const startPub = this.shiftClosestPub(this.start, this.pubs);
+    this.crawl.push(startPub);
 
-    const startPub = this.shiftClosestPub(this.start, availablePubs);
-    crawlPubs.push(startPub);
+    const endPub = this.getClosestPub(this.end, this.pubs);
 
-    const endPub = this.getClosestPub(this.end, availablePubs);
-
-    let testPubs = this.getClosestPubs(this.start, availablePubs, 5);
+    let testPubs = this.getClosestPubs(this.start, this.pubs, 5);
     let nextPub = this.shiftClosestPub(this.end, testPubs);
-    _.remove(availablePubs, pub => pub.id === nextPub.id);
+    _.remove(this.pubs, pub => pub.id === nextPub.id);
 
     while (nextPub.id !== endPub.id) {
-      crawlPubs.push(nextPub);
+      this.crawl.push(nextPub);
 
-      testPubs = this.getClosestPubs(new LatLng(nextPub.lat, nextPub.lng), availablePubs, 5);
+      testPubs = this.getClosestPubs(new LatLng(nextPub.lat, nextPub.lng), this.pubs, 5);
       nextPub = this.shiftClosestPub(this.end, testPubs);
 
-      _.remove(availablePubs, pub => pub.id === nextPub.id);
+      _.remove(this.pubs, pub => pub.id === nextPub.id);
     }
 
-    crawlPubs.push(endPub);
+    this.crawl.push(endPub);
 
-    return crawlPubs;
+    return this.crawl;
   }
 
   /**
