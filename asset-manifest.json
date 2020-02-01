@@ -1,14 +1,14 @@
 {
   "files": {
     "main.css": "/sprawl/static/css/main.96504f10.chunk.css",
-    "main.js": "/sprawl/static/js/main.11e01196.chunk.js",
-    "main.js.map": "/sprawl/static/js/main.11e01196.chunk.js.map",
+    "main.js": "/sprawl/static/js/main.ce8115f4.chunk.js",
+    "main.js.map": "/sprawl/static/js/main.ce8115f4.chunk.js.map",
     "runtime-main.js": "/sprawl/static/js/runtime-main.0aeb0f6e.js",
     "runtime-main.js.map": "/sprawl/static/js/runtime-main.0aeb0f6e.js.map",
     "static/js/2.6817f2b5.chunk.js": "/sprawl/static/js/2.6817f2b5.chunk.js",
     "static/js/2.6817f2b5.chunk.js.map": "/sprawl/static/js/2.6817f2b5.chunk.js.map",
     "index.html": "/sprawl/index.html",
-    "precache-manifest.8dadb68c060b43411ee70d0e75ae10d3.js": "/sprawl/precache-manifest.8dadb68c060b43411ee70d0e75ae10d3.js",
+    "precache-manifest.fb56f44b211d46d956055c93941fbc35.js": "/sprawl/precache-manifest.fb56f44b211d46d956055c93941fbc35.js",
     "service-worker.js": "/sprawl/service-worker.js",
     "static/css/main.96504f10.chunk.css.map": "/sprawl/static/css/main.96504f10.chunk.css.map",
     "static/js/2.6817f2b5.chunk.js.LICENSE": "/sprawl/static/js/2.6817f2b5.chunk.js.LICENSE"
@@ -17,6 +17,6 @@
     "static/js/runtime-main.0aeb0f6e.js",
     "static/js/2.6817f2b5.chunk.js",
     "static/css/main.96504f10.chunk.css",
-    "static/js/main.11e01196.chunk.js"
+    "static/js/main.ce8115f4.chunk.js"
   ]
 }
