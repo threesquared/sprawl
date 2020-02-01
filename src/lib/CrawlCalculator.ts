@@ -107,7 +107,7 @@ export default class CrawlCalculator {
     while (nextPub.id !== endPub.id) {
       this.crawl.push(nextPub);
 
-      testPubs = this.getClosestPubs(new LatLng(nextPub.lat, nextPub.lng), this.pubs, 5);
+      testPubs = this.getClosestPubs(new LatLng(nextPub.lat, nextPub.lng), this.pubs, 15);
       nextPub = this.shiftClosestPub(this.end, testPubs);
 
       _.remove(this.pubs, pub => pub.id === nextPub.id);
