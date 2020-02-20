@@ -15,7 +15,7 @@ const Nav: React.FC<{ setPubLimit: Function, setDistanceLimit: Function, geoLoca
           <button type="button" onClick={ () => geoLocate() }>Set start to my current location</button>
           <br />
           <br />
-          <small>* Left click on the map to set a start location<br />* Right click to set an optional end location<br />* Drag the red markers to change the locations</small>
+          <small>* Left click on the map to set a start location<br />* Right click to set an optional end location</small>
         </span>
         <br />
         <br />
