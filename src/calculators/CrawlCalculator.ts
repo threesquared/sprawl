@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import { computeDistanceBetween } from 'spherical-geometry-js';
 import { Pub } from '../lib/spoons';
-import { milesToMeters, LatLng } from './distance';
+import { milesToMeters, LatLng } from '../lib/distance';
 
 export default class CrawlCalculator {
   /**

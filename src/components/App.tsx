@@ -1,62 +1,60 @@
 import React, { useState, useEffect } from 'react';
-import { GoogleApiWrapper, Map, Marker, InfoWindow, Polyline } from 'google-maps-react';
+import MapGL, { Popup, ViewportProps } from 'react-map-gl';
+import { Feature, LineString } from '@turf/helpers';
 import { getAllPubs, Pub } from '../lib/spoons';
 import { LatLng } from '../lib/distance';
-import CrawlCalculator from '../lib/CrawlCalculator';
+import { getLineString, fitViewportToBounds } from '../lib/geojson';
+import CrawlCalculator from '../calculators/CrawlCalculator';
 import Nav from './Nav';
 import PubInfo from './PubInfo';
 import CrawlInfo from './CrawlInfo';
-import pin from './pin.png';
+import PubMarker from './PubMarker';
+import LocationMarker from './LocationMarker';
+import PathLine from './PathLine';
 import './App.css';
 
 const App: React.FC = () => {
   const [start, setStart] = useState<LatLng>();
   const [end, setEnd] = useState<LatLng>();
   const [pubs, setPubs] = useState<Pub[]>([]);
-  const [bounds, setBounds] = useState<google.maps.LatLngBounds>();
-  const [activeMarker, setActiveMarker] = useState<google.maps.Marker>();
+  const [path, setPath] = useState<Feature<LineString>>();
   const [selectedPub, setSelectedPub] = useState<Pub>();
-  const [map, setMap] = useState<google.maps.Map>();
   const [pubLimit, setPubLimit] = useState(10);
   const [distanceLimit, setDistanceLimit] = useState(10);
   const [showAll, setShowAll] = useState(false);
+  const [viewport, setViewport] = useState<Partial<ViewportProps>>({
+    latitude: 51.5074,
+    longitude: 0.1278,
+    zoom: 9,
+  });
 
   const allPubs = getAllPubs();
 
+  /**
+   * Ask user for their location and set the crawl start to that position
+   */
   const geoLocate = () => {
     navigator.geolocation.getCurrentPosition((position: Position) => {
       setStart(new LatLng(position.coords.latitude, position.coords.longitude));
     });
   }
 
+  /**
+   * Get markers for all visible pubs
+   */
   const getPubMarkers = () => {
     let markers = pubs.map(pub => (
-      <Marker
-        key={ pub.id }
-        position={ pub }
-        icon={{
-          url: pin,
-          scaledSize: new google.maps.Size(27,39)
-        }}
-        onClick={ (props, marker) => {
-          setSelectedPub(pub);
-          setActiveMarker(marker);
-        } }
+      <PubMarker
+        pub={ pub }
+        setSelectedPub={ setSelectedPub }
       />
     ));
 
     if (showAll) {
       markers= markers.concat(allPubs.filter(pub => !pubs.includes(pub)).map(pub => (
-        <Marker
-          key={ pub.id }
-          position={ pub }
-          icon={{
-            url: "http://maps.google.com/mapfiles/ms/icons/blue-dot.png"
-          }}
-          onClick={ (props, marker) => {
-            setSelectedPub(pub);
-            setActiveMarker(marker);
-          } }
+        <PubMarker
+          pub={ pub }
+          setSelectedPub={ setSelectedPub }
         />
       )));
     }
@@ -64,22 +62,32 @@ const App: React.FC = () => {
     return markers;
   }
 
-  const getCrawlPath = () => {
-    const path: (google.maps.LatLngLiteral)[] = [];
-
-    if (start) {
-      path.push(start);
-    }
-
-    path.push(...pubs);
-
-    if (end) {
-      path.push(end);
-    }
-
-    return path;
+  /**
+   * Get an info window for the selected pub
+   */
+  const getPubInfo = () => {
+    return (
+      selectedPub && (
+        <Popup
+          tipSize={ 5 }
+          anchor="top"
+          longitude={ selectedPub.lng }
+          latitude={ selectedPub.lat }
+          closeOnClick={ false }
+          onClose={ () => setSelectedPub(undefined) }
+        >
+          <PubInfo
+            pub={ selectedPub }
+            start={ start }
+          />
+        </Popup>
+      )
+    );
   }
 
+  /**
+   * Called on first load, generate initial path from saved hash or users current location
+   */
   useEffect(() => {
     if (window.location.hash) {
       try {
@@ -98,27 +106,37 @@ const App: React.FC = () => {
     }
   }, []);
 
+  /**
+   * Called when any crawl parameters are updated, regenerate the path
+   */
   useEffect(() => {
     if (start) {
-      const bounds = new google.maps.LatLngBounds();
-      bounds.extend(start);
-
       const calculator = new CrawlCalculator(allPubs, start);
 
       if (end) {
-        bounds.extend(end);
         calculator.setEnd(end);
       }
 
       const crawlPubs = calculator.getCrawlPubs(pubLimit, distanceLimit);
-      crawlPubs.forEach(pub => bounds.extend(pub));
-
-      setBounds(bounds);
       setPubs(crawlPubs);
     } else {
       setPubs([]);
     }
   }, [start, end, pubLimit, distanceLimit]);
+
+  /**
+   * Generate a crawl path and resize the viewport
+   */
+  useEffect(() => {
+    if (start && pubs.length > 0) {
+      const path = getLineString(pubs, start, end);
+
+      setPath(path);
+      setViewport(fitViewportToBounds(path, viewport));
+    } else {
+      setPath(undefined);
+    }
+  }, [pubs, start, end]);
 
   return (
     <div className="app">
@@ -135,63 +153,45 @@ const App: React.FC = () => {
         start={ start }
         end={ end }
       />
-      <Map
-        google={ google }
-        mapTypeControl={ false }
-        fullscreenControl={ false }
-        zoom={ 10 }
-        onClick={ (props, map, event) => setStart(new LatLng(event.latLng.lat(), event.latLng.lng())) }
-        onRightclick={ (props, map, event) => setEnd(new LatLng(event.latLng.lat(), event.latLng.lng())) }
-        onReady={ (props, map) => setMap(map) }
-        bounds={ bounds }
-        initialCenter={{
-          lat: 51.5074,
-          lng: 0.1278
-        }}
+      <MapGL
+        { ...viewport }
+        width="100%"
+        height="100%"
+        mapStyle="mapbox://styles/mapbox/streets-v11"
+        mapboxApiAccessToken={ process.env.REACT_APP_MAPBOX_TOKEN }
+        onViewportChange={ setViewport }
+        onClick={ (event: any) => {
+          if (event.leftButton === true && event.target.nodeName !== 'IMG') {
+            setStart(new LatLng(event.lngLat[1], event.lngLat[0]))
+          }
+        } }
+        onContextMenu={ (event: any) => {
+          setEnd(new LatLng(event.lngLat[1], event.lngLat[0]))
+          event.preventDefault();
+        } }
       >
         { start && (
-          <Marker
-            position={ start }
-            draggable={ true }
-            onDragend={ (marker: any, event: any) => setStart(new LatLng(event.position.lat(), event.position.lng())) }
-            onClick={ () => setStart(undefined) }
+          <LocationMarker
+            location={ start }
+            setLocationFunction={ setStart }
           />
         ) }
         { getPubMarkers() }
         { end && (
-          <Marker
-            position={ end }
-            draggable={ true }
-            onDragend={ (marker: any, event: any) => setEnd(new LatLng(event.position.lat(), event.position.lng())) }
-            onClick={ () => setEnd(undefined) }
+          <LocationMarker
+            location={ end }
+            setLocationFunction={ setEnd }
           />
         ) }
-        <Polyline
-          path={ getCrawlPath() }
-          strokeColor="#0000FF"
-          strokeOpacity={ 0.8 }
-          strokeWeight={ 2 }
-        />
-        <InfoWindow
-          google={ google }
-          map={ map as google.maps.Map }
-          marker={ activeMarker as google.maps.Marker }
-          visible={ activeMarker !== null }
-        >
-          <PubInfo
-            pub={ selectedPub }
-            start={ start }
+        { path && (
+          <PathLine
+            path={ path }
           />
-        </InfoWindow>
-      </Map>
+        ) }
+        { getPubInfo() }
+      </MapGL>
     </div>
   );
 }
 
-export default GoogleApiWrapper({
-  apiKey: process.env.REACT_APP_GOOGLE_API_KEY as string,
-  libraries: [
-    'geometry',
-    'places'
-  ]
-})(App)
+export default App;

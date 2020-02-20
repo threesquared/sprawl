@@ -1,6 +1,6 @@
 import jsgraphs, { WeightedGraph } from 'js-graph-algorithms';
 import { computeDistanceBetween } from 'spherical-geometry-js';
-import { LatLng } from './distance';
+import { LatLng } from '../lib/distance';
 import { Pub } from '../lib/spoons';
 
 export default class GraphThing {
