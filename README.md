@@ -16,4 +16,4 @@ N.B The "algorithms" used are pretty stupid so don't expect too much...
 * Introduce actual public transport travel times/routes
 * Fetch data from the Wetherspoons api?
 * Mobile app
-* Don't use google maps?
+* render graph on page load
