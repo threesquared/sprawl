@@ -5,6 +5,7 @@ import { getAllPubs, Pub } from '../lib/spoons';
 import { LatLng } from '../lib/distance';
 import { getLineString, fitViewportToBounds } from '../lib/geojson';
 import CrawlCalculator from '../calculators/CrawlCalculator';
+import GraphCalculator from '../calculators/GraphCalculator';
 import Nav from './Nav';
 import PubInfo from './PubInfo';
 import CrawlInfo from './CrawlInfo';
@@ -12,6 +13,9 @@ import PubMarker from './PubMarker';
 import LocationMarker from './LocationMarker';
 import PathLine from './PathLine';
 import './App.css';
+
+const allPubs = getAllPubs();
+const graph = new GraphCalculator(allPubs);
 
 const App: React.FC = () => {
   const [start, setStart] = useState<LatLng>();
@@ -26,9 +30,9 @@ const App: React.FC = () => {
     latitude: 51.5074,
     longitude: 0.1278,
     zoom: 9,
+    bearing: 0,
+    pitch: 50
   });
-
-  const allPubs = getAllPubs();
 
   /**
    * Ask user for their location and set the crawl start to that position
@@ -111,14 +115,14 @@ const App: React.FC = () => {
    */
   useEffect(() => {
     if (start) {
-      const calculator = new CrawlCalculator(allPubs, start);
+      graph.setStart(start);
 
       if (end) {
-        calculator.setEnd(end);
-      }
+        graph.setEnd(end);
 
-      const crawlPubs = calculator.getCrawlPubs(pubLimit, distanceLimit);
-      setPubs(crawlPubs);
+        const crawlPubs = graph.getCrawlPubs(pubLimit, distanceLimit);
+        setPubs(crawlPubs);
+      }
     } else {
       setPubs([]);
     }

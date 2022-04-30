@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { Graph, Edge, alg } from 'graphlib';
+import jsgraphs, { WeightedGraph } from 'js-graph-algorithms';
 import { computeDistanceBetween } from 'spherical-geometry-js';
 import { LatLng, milesToMeters } from '../lib/distance';
 import { Pub } from '../lib/spoons';
@@ -16,8 +16,6 @@ export default class GraphCalculator {
    */
   public start?: LatLng;
 
-  private graph: Graph;
-
   /**
    * Ending point
    */
@@ -25,9 +23,6 @@ export default class GraphCalculator {
 
   public constructor(pubs: Pub[]) {
     this.pubs = pubs;
-    this.graph = new Graph({ directed: false });
-
-    this.generateGraph();
   }
 
   public setStart(start: LatLng) {
@@ -43,41 +38,58 @@ export default class GraphCalculator {
       return [];
     }
 
-    const startPub = this.getClosestPubs(this.start)[0];
-    const endPub = this.getClosestPubs(this.end)[0];
+    const pubs = this.getPubsWithinMiles(this.start, distanceLimit);
+    const graph = this.generateGraph(pubs);
 
-    const lol = alg.dijkstra(this.graph, startPub.id, (e: Edge): any => {
+    const startPub = this.getClosestPubs(this.pubs, this.start)[0];
+    const endPub = this.getClosestPubs(this.pubs, this.end)[0];
 
-      const a = this.pubs.find(findPub => findPub.id === e.v);
-      const b = this.pubs.find(findPub2 => findPub2.id === e.w);
+    var dijkstra = new jsgraphs.Dijkstra(graph, this.getPubIndex(pubs, startPub));
 
-      if (!a || !b) {
-        return;
-      }
+    const endIndex = this.getPubIndex(pubs, endPub)
 
-      return computeDistanceBetween(new LatLng(a.lat, a.lng), new LatLng(b.lat, b.lng))
+    if (dijkstra.hasPathTo(endIndex)){
+      var path = dijkstra.pathTo(endIndex);
 
-    }, (v: any): any => this.graph.nodeEdges(v));
+      const crawl = [pubs[path[0].from()]];
 
-    console.log(lol);
+      path.forEach(edge => {
+        crawl.push(pubs[edge.to()]);
+      })
+
+      console.log(crawl);
+
+      return crawl;
+    }
+
+    console.log(endIndex);
 
     return [];
   }
 
-  private generateGraph() {
-    this.pubs.forEach((pub, index) => {
+  private generateGraph(pubs: Pub[]) {
+    const graph = new jsgraphs.WeightedGraph(pubs.length);
+
+    pubs.forEach((pub, index) => {
       console.log(`indexing pub ${index}`);
 
-        this.graph.setNode(pub.id);
+      const closest = this.getClosestPubs(pubs, new LatLng(pub.lat, pub.lng), 10, pub);
 
-        this.pubs.filter(filterPub => filterPub.id !== pub.id).forEach(subPub => {
-          this.graph.setEdge(pub.id, subPub.id);
-        })
+      closest.forEach(closePub => {
+        const dist = computeDistanceBetween(new LatLng(pub.lat, pub.lng), new LatLng(closePub.lat, closePub.lng));
+        const edge = new jsgraphs.Edge(index, this.getPubIndex(pubs, closePub), dist);
+
+        console.log('klol', edge);
+
+        graph.addEdge(edge);
+      })
     })
+
+    return graph;
   }
 
-  private getClosestPubs(point: LatLng, limit: number = 1, filterPub?: Pub): Pub[] {
-    return this.pubs.filter(pub => {
+  private getClosestPubs(pubs: Pub[], point: LatLng, limit: number = 1, filterPub?: Pub): Pub[] {
+    return [...pubs].filter(pub => {
       if (filterPub) {
         return filterPub.id !== pub.id;
       }
