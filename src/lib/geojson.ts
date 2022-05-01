@@ -2,24 +2,23 @@ import { Feature, LineString, lineString } from '@turf/helpers';
 import { FlyToInterpolator, ViewportProps } from 'react-map-gl';
 import WebMercatorViewport from 'viewport-mercator-project';
 import { LatLng } from './distance';
-import { Pub } from './spoons';
 import bbox from '@turf/bbox';
 
 /**
  * Get the whole crawl path including start and end as a GeoJSON LineString Feature
  *
- * @param pubs
+ * @param coords
  * @param start
  * @param end
  */
-export function getLineString(pubs: Pub[], start?: LatLng, end?: LatLng): Feature<LineString> {
+export function getLineString(coords: number[][], start?: LatLng, end?: LatLng): Feature<LineString> {
  let path: number[][] = [];
 
  if (start) {
    path.push([start.lng, start.lat]);
  }
 
- pubs.forEach(pub => path.push([pub.lng, pub.lat]));
+ coords.forEach(coord => path.push(coord));
 
  if (end) {
    path.push([end.lng, end.lat]);

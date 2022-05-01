@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import MapGL, { Popup, ViewportProps } from 'react-map-gl';
 import { Feature, LineString } from '@turf/helpers';
+import openrouteservice from 'openrouteservice-js';
+import polyline from '@mapbox/polyline';
 import { getAllPubs, Pub } from '../lib/spoons';
 import { LatLng } from '../lib/distance';
 import { getLineString, fitViewportToBounds } from '../lib/geojson';
@@ -12,6 +14,8 @@ import PubMarker from './PubMarker';
 import LocationMarker from './LocationMarker';
 import PathLine from './PathLine';
 import './App.css';
+
+const directions = new openrouteservice.Directions({ api_key: process.env.REACT_APP_ORS_TOKEN });
 
 const App: React.FC = () => {
   const [start, setStart] = useState<LatLng>();
@@ -26,6 +30,8 @@ const App: React.FC = () => {
     latitude: 51.5074,
     longitude: 0.1278,
     zoom: 9,
+    // bearing: 0,
+    // pitch: 50
   });
 
   const allPubs = getAllPubs();
@@ -43,8 +49,9 @@ const App: React.FC = () => {
    * Get markers for all visible pubs
    */
   const getPubMarkers = () => {
-    let markers = pubs.map(pub => (
+    let markers = pubs.map((pub, index) => (
       <PubMarker
+        key={ index }
         pub={ pub }
         setSelectedPub={ setSelectedPub }
       />
@@ -129,9 +136,24 @@ const App: React.FC = () => {
    */
   useEffect(() => {
     if (start && pubs.length > 0) {
-      const path = getLineString(pubs, start, end);
+      const pubCoords = pubs.map(pub => [pub.lng, pub.lat]);
+      const path = getLineString(pubCoords, start, end);
 
-      setPath(path);
+      directions.calculate({
+        coordinates: pubCoords,
+        profile: 'foot-walking',
+        format: 'json'
+      })
+      .then(function(json: any) {
+        const path = getLineString(polyline.toGeoJSON(json.routes[0].geometry).coordinates, start, end);
+
+        setPath(path);
+      })
+      .catch(function(err: any) {
+        console.error('Could not find directions', err);
+        setPath(path);
+      });
+
       setViewport(fitViewportToBounds(path, viewport));
     } else {
       setPath(undefined);
