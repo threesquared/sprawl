@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import MapGL, { Popup, ViewportProps } from 'react-map-gl';
-import { Feature, LineString } from '@turf/helpers';
-import openrouteservice from 'openrouteservice-js';
 import polyline from '@mapbox/polyline';
+import { Feature, LineString } from '@turf/helpers';
+import { Loader } from '@googlemaps/js-api-loader';
+import { Coordinates } from '@mapbox/mapbox-sdk/lib/classes/mapi-request';
 import { getAllPubs, Pub } from '../lib/spoons';
 import { LatLng } from '../lib/distance';
 import { getLineString, fitViewportToBounds } from '../lib/geojson';
+import { getDirections } from '../lib/directions';
 import CrawlCalculator from '../calculators/CrawlCalculator';
 import Nav from './Nav';
 import PubInfo from './PubInfo';
@@ -15,12 +17,11 @@ import LocationMarker from './LocationMarker';
 import PathLine from './PathLine';
 import './App.css';
 
-const directions = new openrouteservice.Directions({ api_key: process.env.REACT_APP_ORS_TOKEN });
-
 const App: React.FC = () => {
   const [start, setStart] = useState<LatLng>();
   const [end, setEnd] = useState<LatLng>();
   const [pubs, setPubs] = useState<Pub[]>([]);
+  const [service, setService] = useState<google.maps.places.PlacesService>();
   const [path, setPath] = useState<Feature<LineString>>();
   const [selectedPub, setSelectedPub] = useState<Pub>();
   const [pubLimit, setPubLimit] = useState(10);
@@ -96,6 +97,21 @@ const App: React.FC = () => {
    * Called on first load, generate initial path from saved hash or users current location
    */
   useEffect(() => {
+    new Loader({
+      apiKey: process.env.REACT_APP_GOOGLE_API_KEY as string,
+      libraries: ['places']
+    })
+    .load()
+    .then((google) => {
+      const places = google.maps.places;
+      const service = new places.PlacesService(document.createElement('div'));
+
+      setService(service);
+    })
+    .catch(e => {
+      console.log('Error loading Google Maps API', e);
+    });
+
     if (window.location.hash) {
       try {
         const [savedStart, savedEnd] = JSON.parse(new Buffer(window.location.hash.substring(1), 'base64').toString('ascii'));
@@ -136,16 +152,12 @@ const App: React.FC = () => {
    */
   useEffect(() => {
     if (start && pubs.length > 0) {
-      const pubCoords = pubs.map(pub => [pub.lng, pub.lat]);
+      const pubCoords = pubs.map(pub => [pub.lng, pub.lat] as Coordinates);
       const path = getLineString(pubCoords, start, end);
 
-      directions.calculate({
-        coordinates: pubCoords,
-        profile: 'foot-walking',
-        format: 'json'
-      })
+      getDirections(pubCoords)
       .then(function(json: any) {
-        const path = getLineString(polyline.toGeoJSON(json.routes[0].geometry).coordinates, start, end);
+        const path = getLineString(polyline.toGeoJSON(json).coordinates, start, end);
 
         setPath(path);
       })
