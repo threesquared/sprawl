@@ -1,4 +1,12 @@
 import { LatLng } from './distance'
+import { Loader } from '@googlemaps/js-api-loader';
+import { Pub } from '../components/App';
+
+const loader = new Loader({
+  apiKey: process.env.REACT_APP_GOOGLE_API_KEY as string,
+  version: "weekly",
+  libraries: ["places"]
+});
 
 /**
  * Find pubs and bars in a given area from Google Places
@@ -6,19 +14,32 @@ import { LatLng } from './distance'
  * @param service
  * @param location
  */
-export async function findPubs(service: google.maps.places.PlacesService, location: LatLng): Promise<google.maps.places.PlaceResult[]> {
-  var request = {
+export async function findPubs(location: LatLng): Promise<Pub[]> {
+  const google = await loader.load();
+
+  const places = google.maps.places;
+  const service = new places.PlacesService(document.createElement('div'));
+
+  const request = {
     query: 'pub',
     openNow: true,
-    location: new google.maps.LatLng(location.lat, location.lng),
-    radius: 5000,
+    location,
+    radius: 20000,
     type: 'bar',
+    key: process.env.REACT_APP_GOOGLE_API_KEY as string
   };
 
   return new Promise((resolve, reject) => {
     service.textSearch(request, (results, status) => {
       if (status === google.maps.places.PlacesServiceStatus.OK && results) {
-        resolve(results);
+        resolve(results.map(result => {
+          return {
+            id: result.place_id as string,
+            name: result.name as string,
+            address: result.formatted_address as string,
+            location: new LatLng(result!.geometry!.location!.lat(), result!.geometry!.location!.lng()),
+          }
+        }));
       } else {
         reject(status);
       }

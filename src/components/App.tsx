@@ -2,9 +2,8 @@ import React, { useState, useEffect } from 'react';
 import MapGL, { Popup, ViewportProps } from 'react-map-gl';
 import polyline from '@mapbox/polyline';
 import { Feature, LineString } from '@turf/helpers';
-import { Loader } from '@googlemaps/js-api-loader';
 import { Coordinates } from '@mapbox/mapbox-sdk/lib/classes/mapi-request';
-import { getAllPubs, Pub } from '../lib/spoons';
+import { findPubs } from '../lib/google';
 import { LatLng } from '../lib/distance';
 import { getLineString, fitViewportToBounds } from '../lib/geojson';
 import { getDirections } from '../lib/directions';
@@ -17,16 +16,21 @@ import LocationMarker from './LocationMarker';
 import PathLine from './PathLine';
 import './App.css';
 
+export interface Pub {
+  id: string
+  name: string
+  address: string
+  location: LatLng
+}
+
 const App: React.FC = () => {
   const [start, setStart] = useState<LatLng>();
   const [end, setEnd] = useState<LatLng>();
   const [pubs, setPubs] = useState<Pub[]>([]);
-  const [service, setService] = useState<google.maps.places.PlacesService>();
   const [path, setPath] = useState<Feature<LineString>>();
   const [selectedPub, setSelectedPub] = useState<Pub>();
   const [pubLimit, setPubLimit] = useState(10);
   const [distanceLimit, setDistanceLimit] = useState(10);
-  const [showAll, setShowAll] = useState(false);
   const [viewport, setViewport] = useState<Partial<ViewportProps>>({
     latitude: 51.5074,
     longitude: 0.1278,
@@ -34,8 +38,6 @@ const App: React.FC = () => {
     // bearing: 0,
     // pitch: 50
   });
-
-  const allPubs = getAllPubs();
 
   /**
    * Ask user for their location and set the crawl start to that position
@@ -58,15 +60,6 @@ const App: React.FC = () => {
       />
     ));
 
-    if (showAll) {
-      markers= markers.concat(allPubs.filter(pub => !pubs.includes(pub)).map(pub => (
-        <PubMarker
-          pub={ pub }
-          setSelectedPub={ setSelectedPub }
-        />
-      )));
-    }
-
     return markers;
   }
 
@@ -79,8 +72,8 @@ const App: React.FC = () => {
         <Popup
           tipSize={ 5 }
           anchor="top"
-          longitude={ selectedPub.lng }
-          latitude={ selectedPub.lat }
+          longitude={ selectedPub.location.lng }
+          latitude={ selectedPub.location.lat }
           closeOnClick={ false }
           onClose={ () => setSelectedPub(undefined) }
         >
@@ -97,21 +90,6 @@ const App: React.FC = () => {
    * Called on first load, generate initial path from saved hash or users current location
    */
   useEffect(() => {
-    new Loader({
-      apiKey: process.env.REACT_APP_GOOGLE_API_KEY as string,
-      libraries: ['places']
-    })
-    .load()
-    .then((google) => {
-      const places = google.maps.places;
-      const service = new places.PlacesService(document.createElement('div'));
-
-      setService(service);
-    })
-    .catch(e => {
-      console.log('Error loading Google Maps API', e);
-    });
-
     if (window.location.hash) {
       try {
         const [savedStart, savedEnd] = JSON.parse(new Buffer(window.location.hash.substring(1), 'base64').toString('ascii'));
@@ -134,14 +112,16 @@ const App: React.FC = () => {
    */
   useEffect(() => {
     if (start) {
-      const calculator = new CrawlCalculator(allPubs, start);
+      findPubs(start).then((pubs) => {
+        const calculator = new CrawlCalculator(pubs as Pub[], start);
 
-      if (end) {
-        calculator.setEnd(end);
-      }
+          if (end) {
+            calculator.setEnd(end);
+          }
 
-      const crawlPubs = calculator.getCrawlPubs(pubLimit, distanceLimit);
-      setPubs(crawlPubs);
+          const crawlPubs = calculator.getCrawlPubs(pubLimit, distanceLimit);
+          setPubs(crawlPubs);
+      });
     } else {
       setPubs([]);
     }
@@ -152,21 +132,20 @@ const App: React.FC = () => {
    */
   useEffect(() => {
     if (start && pubs.length > 0) {
-      const pubCoords = pubs.map(pub => [pub.lng, pub.lat] as Coordinates);
-      const path = getLineString(pubCoords, start, end);
+      const pubCoords = pubs.map(pub => [pub.location.lng, pub.location.lat] as Coordinates);
 
       getDirections(pubCoords)
-      .then(function(res) {
-        const path = getLineString(polyline.toGeoJSON(res.geometry).coordinates, start, end);
-
-        setPath(path);
-      })
-      .catch(function(err) {
-        console.error('Could not find directions', err);
-        setPath(path);
-      });
-
-      setViewport(fitViewportToBounds(path, viewport));
+        .then((res) => {
+          const path = getLineString(polyline.toGeoJSON(res.geometry).coordinates, start, end);
+          setPath(path);
+          setViewport(fitViewportToBounds(path, viewport));
+        })
+        .catch((err) => {
+          console.error('Could not find directions', err);
+          const path = getLineString(pubCoords, start, end);
+          setPath(path);
+          setViewport(fitViewportToBounds(path, viewport));
+        });
     } else {
       setPath(undefined);
     }
@@ -179,8 +158,6 @@ const App: React.FC = () => {
         setPubLimit={ setPubLimit }
         setDistanceLimit={ setDistanceLimit }
         geoLocate={ geoLocate }
-        showAll={ showAll }
-        setShowAll={ setShowAll }
       />
       <CrawlInfo
         pubs={ pubs }

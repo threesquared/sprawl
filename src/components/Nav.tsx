@@ -1,7 +1,7 @@
 import React from 'react';
 import './Nav.css';
 
-const Nav: React.FC<{ setPubLimit: Function, setDistanceLimit: Function, geoLocate: Function, showAll: boolean; setShowAll: Function }> = ({ setPubLimit, setDistanceLimit, geoLocate, showAll, setShowAll }) => {
+const Nav: React.FC<{ setPubLimit: Function, setDistanceLimit: Function, geoLocate: Function }> = ({ setPubLimit, setDistanceLimit, geoLocate }) => {
   return (
     <div className="nav">
       <h3>Pub Crawl Generator</h3>
@@ -17,11 +17,6 @@ const Nav: React.FC<{ setPubLimit: Function, setDistanceLimit: Function, geoLoca
           <br />
           <small>* Left click on the map to set a start location<br />* Right click to set an optional end location</small>
         </span>
-        <br />
-        <br />
-        <label>
-          <input type="checkbox" onChange={ () => setShowAll(!showAll) } /><small>Show all other locations</small>
-        </label>
       </form>
     </div>
   );

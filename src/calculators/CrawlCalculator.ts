@@ -1,11 +1,11 @@
 import _ from 'lodash';
 import { computeDistanceBetween } from 'spherical-geometry-js';
-import { Pub } from '../lib/spoons';
+import { Pub } from '../components/App';
 import { milesToMeters, LatLng } from '../lib/distance';
 
 export default class CrawlCalculator {
   /**
-   * List of all Wetherspoons pubs
+   * List of all pubs
    */
   public pubs: Pub[];
 
@@ -72,9 +72,9 @@ export default class CrawlCalculator {
     for (let i=0; i < pubLimit; i++) {
       this.crawl.push(nextPub);
 
-      nextPub = this.shiftClosestPub(new LatLng(nextPub.lat, nextPub.lng), this.pubs);
+      nextPub = this.shiftClosestPub(new LatLng(nextPub.location.lat, nextPub.location.lng), this.pubs);
 
-      if(computeDistanceBetween(this.start, new LatLng(nextPub.lat, nextPub.lng)) > milesToMeters(distanceLimit)) {
+      if(computeDistanceBetween(this.start, new LatLng(nextPub.location.lat, nextPub.location.lng)) > milesToMeters(distanceLimit)) {
         break;
       }
     }
@@ -107,7 +107,7 @@ export default class CrawlCalculator {
     while (nextPub.id !== endPub.id) {
       this.crawl.push(nextPub);
 
-      testPubs = this.getClosestPubs(new LatLng(nextPub.lat, nextPub.lng), this.pubs, 15);
+      testPubs = this.getClosestPubs(new LatLng(nextPub.location.lat, nextPub.location.lng), this.pubs, 15);
       nextPub = this.shiftClosestPub(this.end, testPubs);
 
       _.remove(this.pubs, pub => pub.id === nextPub.id);
@@ -126,10 +126,10 @@ export default class CrawlCalculator {
    */
   private sortPubsByDistanceTo(start: LatLng, pubs: Pub[]): void {
     pubs.sort((a, b) => {
-      a.distanceToNext = computeDistanceBetween(start, new LatLng(Number(a.lat), Number(a.lng)));
-      b.distanceToNext = computeDistanceBetween(start, new LatLng(Number(b.lat), Number(b.lng)));
+      const distanceToNextA = computeDistanceBetween(start, new LatLng(Number(a.location.lat), Number(a.location.lng)));
+      const distanceToNextB = computeDistanceBetween(start, new LatLng(Number(b.location.lat), Number(b.location.lng)));
 
-      return a.distanceToNext - b.distanceToNext;
+      return distanceToNextA - distanceToNextB;
     });
   }
 
