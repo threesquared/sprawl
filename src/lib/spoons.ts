@@ -4,20 +4,23 @@ import apiData from '../spoons.json';
 import { LatLng } from './distance.js';
 
 export async function findPubs(location: LatLng): Promise<Pub[]> {
-  const response = await axios.post<{ results: Pub[] }>('https://www.jdwetherspoon.com/api/advancedsearch', {
-    location,
-    paging: {
-      numberPerPage: 30,
-      page: 0,
-      UsePagination: true
-    },
-  });
+  const response = await axios.post<{ results: Pub[] }>(
+    'https://www.jdwetherspoon.com/api/advancedsearch',
+    {
+      location,
+      paging: {
+        numberPerPage: 30,
+        page: 0,
+        UsePagination: true,
+      },
+    }
+  );
 
   return response.data.results;
 }
 
 export function getAllPubs(): Pub[] {
-  return _.flatten(_.flatten(_.map(apiData.regions, 'subRegions')).map(region => region.items)); // Fix this dumb shit
+  return _.flatten(_.flatten(_.map(apiData.regions, 'subRegions')).map((region) => region.items)); // Fix this dumb shit
 }
 
 export interface Pub {

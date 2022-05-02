@@ -6,7 +6,7 @@ describe('crawl calculator', () => {
     let pubs: Pub[];
 
     beforeEach(() => {
-      const start: any = {lat: () => 51.592872799999995, lng: () => -0.0759431000000177}
+      const start: any = { lat: () => 51.592872799999995, lng: () => -0.0759431000000177 };
       const calculator = new CrawlCalculator(getAllPubs(), start);
 
       pubs = calculator.getCrawlPubs(10, 10);
@@ -29,8 +29,8 @@ describe('crawl calculator', () => {
     let pubs: Pub[];
 
     beforeEach(() => {
-      const start: any = {lat: () => 51.581307538616144, lng: () => -0.03786397066346581}
-      const end: any = {lat: () => 51.49996329430803, lng: () => -0.10365439619420158}
+      const start: any = { lat: () => 51.581307538616144, lng: () => -0.03786397066346581 };
+      const end: any = { lat: () => 51.49996329430803, lng: () => -0.10365439619420158 };
       const calculator = new CrawlCalculator(getAllPubs(), start);
       calculator.setEnd(end);
 

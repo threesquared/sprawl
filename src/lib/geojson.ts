@@ -11,20 +11,24 @@ import bbox from '@turf/bbox';
  * @param start
  * @param end
  */
-export function getLineString(coords: number[][], start?: LatLng, end?: LatLng): Feature<LineString> {
- let path: number[][] = [];
+export function getLineString(
+  coords: number[][],
+  start?: LatLng,
+  end?: LatLng
+): Feature<LineString> {
+  let path: number[][] = [];
 
- if (start) {
-   path.push([start.lng, start.lat]);
- }
+  if (start) {
+    path.push([start.lng, start.lat]);
+  }
 
- coords.forEach(coord => path.push(coord));
+  coords.forEach((coord) => path.push(coord));
 
- if (end) {
-   path.push([end.lng, end.lat]);
- }
+  if (end) {
+    path.push([end.lng, end.lat]);
+  }
 
- return lineString(path);
+  return lineString(path);
 }
 
 /**
@@ -32,12 +36,22 @@ export function getLineString(coords: number[][], start?: LatLng, end?: LatLng):
  *
  * @param path
  */
-export function fitViewportToBounds(path: Feature<LineString>, viewport: Partial<ViewportProps>, padding: number = 70): Partial<ViewportProps> {
+export function fitViewportToBounds(
+  path: Feature<LineString>,
+  viewport: Partial<ViewportProps>,
+  padding: number = 70
+): Partial<ViewportProps> {
   const [minLng, minLat, maxLng, maxLat] = bbox(path);
   const mercatorViewport = new WebMercatorViewport(viewport);
-  const { longitude, latitude, zoom } = mercatorViewport.fitBounds([[minLng, minLat], [maxLng, maxLat]], {
-    padding
-  });
+  const { longitude, latitude, zoom } = mercatorViewport.fitBounds(
+    [
+      [minLng, minLat],
+      [maxLng, maxLat],
+    ],
+    {
+      padding,
+    }
+  );
 
   return {
     ...viewport,
@@ -45,6 +59,6 @@ export function fitViewportToBounds(path: Feature<LineString>, viewport: Partial
     latitude,
     zoom,
     transitionInterpolator: new FlyToInterpolator({ speed: 1 }),
-    transitionDuration: 'auto'
+    transitionDuration: 'auto',
   };
 }

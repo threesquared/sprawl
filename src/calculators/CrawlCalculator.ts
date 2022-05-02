@@ -69,12 +69,18 @@ export default class CrawlCalculator {
   private nearestPubNextMethod(pubLimit: number, distanceLimit: number) {
     let nextPub = this.shiftClosestPub(this.start, this.pubs);
 
-    for (let i=0; i < pubLimit; i++) {
+    for (let i = 0; i < pubLimit; i++) {
       this.crawl.push(nextPub);
 
-      nextPub = this.shiftClosestPub(new LatLng(nextPub.location.lat, nextPub.location.lng), this.pubs);
+      nextPub = this.shiftClosestPub(
+        new LatLng(nextPub.location.lat, nextPub.location.lng),
+        this.pubs
+      );
 
-      if(computeDistanceBetween(this.start, new LatLng(nextPub.location.lat, nextPub.location.lng)) > milesToMeters(distanceLimit)) {
+      if (
+        computeDistanceBetween(this.start, new LatLng(nextPub.location.lat, nextPub.location.lng)) >
+        milesToMeters(distanceLimit)
+      ) {
         break;
       }
     }
@@ -92,7 +98,7 @@ export default class CrawlCalculator {
    */
   private budgetShortestPathFirstMethod(pubLimit: number, distanceLimit: number) {
     if (!this.end) {
-      return []
+      return [];
     }
 
     const startPub = this.shiftClosestPub(this.start, this.pubs);
@@ -102,15 +108,19 @@ export default class CrawlCalculator {
 
     let testPubs = this.getClosestPubs(this.start, this.pubs, 5);
     let nextPub = this.shiftClosestPub(this.end, testPubs);
-    _.remove(this.pubs, pub => pub.id === nextPub.id);
+    _.remove(this.pubs, (pub) => pub.id === nextPub.id);
 
     while (nextPub.id !== endPub.id) {
       this.crawl.push(nextPub);
 
-      testPubs = this.getClosestPubs(new LatLng(nextPub.location.lat, nextPub.location.lng), this.pubs, 15);
+      testPubs = this.getClosestPubs(
+        new LatLng(nextPub.location.lat, nextPub.location.lng),
+        this.pubs,
+        15
+      );
       nextPub = this.shiftClosestPub(this.end, testPubs);
 
-      _.remove(this.pubs, pub => pub.id === nextPub.id);
+      _.remove(this.pubs, (pub) => pub.id === nextPub.id);
     }
 
     this.crawl.push(endPub);
@@ -126,8 +136,14 @@ export default class CrawlCalculator {
    */
   private sortPubsByDistanceTo(start: LatLng, pubs: Pub[]): void {
     pubs.sort((a, b) => {
-      const distanceToNextA = computeDistanceBetween(start, new LatLng(Number(a.location.lat), Number(a.location.lng)));
-      const distanceToNextB = computeDistanceBetween(start, new LatLng(Number(b.location.lat), Number(b.location.lng)));
+      const distanceToNextA = computeDistanceBetween(
+        start,
+        new LatLng(Number(a.location.lat), Number(a.location.lng))
+      );
+      const distanceToNextB = computeDistanceBetween(
+        start,
+        new LatLng(Number(b.location.lat), Number(b.location.lng))
+      );
 
       return distanceToNextA - distanceToNextB;
     });

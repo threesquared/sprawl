@@ -17,10 +17,10 @@ import PathLine from './PathLine';
 import './App.css';
 
 export interface Pub {
-  id: string
-  name: string
-  address: string
-  location: LatLng
+  id: string;
+  name: string;
+  address: string;
+  location: LatLng;
 }
 
 const App: React.FC = () => {
@@ -43,25 +43,21 @@ const App: React.FC = () => {
    * Ask user for their location and set the crawl start to that position
    */
   const geoLocate = () => {
-    navigator.geolocation.getCurrentPosition((position: Position) => {
+    navigator.geolocation.getCurrentPosition((position) => {
       setStart(new LatLng(position.coords.latitude, position.coords.longitude));
     });
-  }
+  };
 
   /**
    * Get markers for all visible pubs
    */
   const getPubMarkers = () => {
     let markers = pubs.map((pub, index) => (
-      <PubMarker
-        key={ index }
-        pub={ pub }
-        setSelectedPub={ setSelectedPub }
-      />
+      <PubMarker key={index} pub={pub} setSelectedPub={setSelectedPub} />
     ));
 
     return markers;
-  }
+  };
 
   /**
    * Get an info window for the selected pub
@@ -70,21 +66,18 @@ const App: React.FC = () => {
     return (
       selectedPub && (
         <Popup
-          tipSize={ 5 }
+          tipSize={5}
           anchor="top"
-          longitude={ selectedPub.location.lng }
-          latitude={ selectedPub.location.lat }
-          closeOnClick={ false }
-          onClose={ () => setSelectedPub(undefined) }
+          longitude={selectedPub.location.lng}
+          latitude={selectedPub.location.lat}
+          closeOnClick={false}
+          onClose={() => setSelectedPub(undefined)}
         >
-          <PubInfo
-            pub={ selectedPub }
-            start={ start }
-          />
+          <PubInfo pub={selectedPub} start={start} />
         </Popup>
       )
     );
-  }
+  };
 
   /**
    * Called on first load, generate initial path from saved hash or users current location
@@ -92,15 +85,17 @@ const App: React.FC = () => {
   useEffect(() => {
     if (window.location.hash) {
       try {
-        const [savedStart, savedEnd] = JSON.parse(new Buffer(window.location.hash.substring(1), 'base64').toString('ascii'));
+        const [savedStart, savedEnd] = JSON.parse(
+          new Buffer(window.location.hash.substring(1), 'base64').toString('ascii')
+        );
 
-        if (savedEnd){
+        if (savedEnd) {
           setEnd(new LatLng(savedEnd[0], savedEnd[1]));
         }
 
         setStart(new LatLng(savedStart[0], savedStart[1]));
-      } catch(e) {
-        alert('Sorry, could not parse that saved url')
+      } catch (e) {
+        alert('Sorry, could not parse that saved url');
       }
     } else {
       geoLocate();
@@ -115,12 +110,12 @@ const App: React.FC = () => {
       findPubs(start).then((pubs) => {
         const calculator = new CrawlCalculator(pubs as Pub[], start);
 
-          if (end) {
-            calculator.setEnd(end);
-          }
+        if (end) {
+          calculator.setEnd(end);
+        }
 
-          const crawlPubs = calculator.getCrawlPubs(pubLimit, distanceLimit);
-          setPubs(crawlPubs);
+        const crawlPubs = calculator.getCrawlPubs(pubLimit, distanceLimit);
+        setPubs(crawlPubs);
       });
     } else {
       setPubs([]);
@@ -132,7 +127,7 @@ const App: React.FC = () => {
    */
   useEffect(() => {
     if (start && pubs.length > 0) {
-      const pubCoords = pubs.map(pub => [pub.location.lng, pub.location.lat] as Coordinates);
+      const pubCoords = pubs.map((pub) => [pub.location.lng, pub.location.lat] as Coordinates);
 
       getDirections(pubCoords)
         .then((res) => {
@@ -153,56 +148,41 @@ const App: React.FC = () => {
 
   return (
     <div className="app">
-      <a className="github-fork-ribbon" href="https://github.com/threesquared/sprawl" data-ribbon="Fork me on GitHub" title="Fork me on GitHub">Fork me on GitHub</a>
-      <Nav
-        setPubLimit={ setPubLimit }
-        setDistanceLimit={ setDistanceLimit }
-        geoLocate={ geoLocate }
-      />
-      <CrawlInfo
-        pubs={ pubs }
-        start={ start }
-        end={ end }
-      />
+      <a
+        className="github-fork-ribbon"
+        href="https://github.com/threesquared/sprawl"
+        data-ribbon="Fork me on GitHub"
+        title="Fork me on GitHub"
+      >
+        Fork me on GitHub
+      </a>
+      <Nav setPubLimit={setPubLimit} setDistanceLimit={setDistanceLimit} geoLocate={geoLocate} />
+      <CrawlInfo pubs={pubs} start={start} end={end} />
       <MapGL
-        { ...viewport }
+        {...viewport}
         width="100%"
         height="100%"
         mapStyle="mapbox://styles/mapbox/streets-v11"
-        mapboxApiAccessToken={ process.env.REACT_APP_MAPBOX_TOKEN }
-        onViewportChange={ setViewport }
-        onClick={ (event: any) => {
+        mapboxApiAccessToken={process.env.REACT_APP_MAPBOX_TOKEN}
+        onViewportChange={setViewport}
+        onClick={(event: any) => {
           if (event.leftButton === true && event.target.nodeName !== 'IMG') {
-            setStart(new LatLng(event.lngLat[1], event.lngLat[0]))
+            setStart(new LatLng(event.lngLat[1], event.lngLat[0]));
           }
-        } }
-        onContextMenu={ (event: any) => {
-          setEnd(new LatLng(event.lngLat[1], event.lngLat[0]))
+        }}
+        onContextMenu={(event: any) => {
+          setEnd(new LatLng(event.lngLat[1], event.lngLat[0]));
           event.preventDefault();
-        } }
+        }}
       >
-        { start && (
-          <LocationMarker
-            location={ start }
-            setLocationFunction={ setStart }
-          />
-        ) }
-        { getPubMarkers() }
-        { end && (
-          <LocationMarker
-            location={ end }
-            setLocationFunction={ setEnd }
-          />
-        ) }
-        { path && (
-          <PathLine
-            path={ path }
-          />
-        ) }
-        { getPubInfo() }
+        {start && <LocationMarker location={start} setLocationFunction={setStart} />}
+        {getPubMarkers()}
+        {end && <LocationMarker location={end} setLocationFunction={setEnd} />}
+        {path && <PathLine path={path} />}
+        {getPubInfo()}
       </MapGL>
     </div>
   );
-}
+};
 
 export default App;

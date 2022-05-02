@@ -31,7 +31,7 @@ export class LatLng {
   public toJSON() {
     return {
       lat: this.lat,
-      lng: this.lng
-    }
+      lng: this.lng,
+    };
   }
 }

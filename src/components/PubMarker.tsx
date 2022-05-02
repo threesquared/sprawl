@@ -3,24 +3,25 @@ import { Marker } from 'react-map-gl';
 import { Pub } from './App';
 import pin from './pin.png';
 
-const PubMarker: React.FC<{ pub: Pub, setSelectedPub: Function }> = ({ pub, setSelectedPub }) => {
+const PubMarker: React.FC<{ pub: Pub; setSelectedPub: Function }> = ({ pub, setSelectedPub }) => {
   return (
     <Marker
-      key={ pub.id }
-      latitude={ pub.location.lat }
-      longitude={ pub.location.lng }
-      offsetLeft={ -14 }
-      offsetTop={ -38 }
+      key={pub.id}
+      latitude={pub.location.lat}
+      longitude={pub.location.lng}
+      offsetLeft={-14}
+      offsetTop={-38}
     >
       <img
-        src={ pin }
-        alt={ pub.name }
-        onClick={ () => {
+        src={pin}
+        alt={pub.name}
+        onClick={() => {
           setSelectedPub(pub);
-        } }
-      />;
+        }}
+      />
+      ;
     </Marker>
   );
-}
+};
 
-export default PubMarker
+export default PubMarker;

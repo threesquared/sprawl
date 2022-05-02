@@ -8,24 +8,26 @@ const directionsService = directions({ accessToken: process.env.REACT_APP_MAPBOX
  *
  * @param coords
  */
-export async function getDirections(coordinates: Coordinates[]): Promise<{ geometry: string, distance: number }> {
+export async function getDirections(
+  coordinates: Coordinates[]
+): Promise<{ geometry: string; distance: number }> {
   return new Promise((resolve, reject) => {
-    directionsService.getDirections({
-      profile: 'walking',
-      waypoints: coordinates.map(coordinate => ({
-        coordinates: coordinate,
-      })),
-    })
-    .send()
-    .then(response => {
-      resolve({
-        geometry: response.body.routes[0].geometry,
-        distance: response.body.routes[0].distance,
+    directionsService
+      .getDirections({
+        profile: 'walking',
+        waypoints: coordinates.map((coordinate) => ({
+          coordinates: coordinate,
+        })),
+      })
+      .send()
+      .then((response) => {
+        resolve({
+          geometry: response.body.routes[0].geometry,
+          distance: response.body.routes[0].distance,
+        });
+      })
+      .catch((err) => {
+        reject(err);
       });
-    })
-    .catch(err => {
-      reject(err);
-    });
   });
-
 }

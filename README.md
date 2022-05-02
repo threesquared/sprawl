@@ -12,7 +12,7 @@ N.B The "algorithms" used are pretty stupid so don't expect too much...
 
 ## TODO
 
-* Think of a better start/end algorithm
-* Introduce actual public transport travel times/routes
-* Mobile app
-* render graph on page load
+- Think of a better start/end algorithm
+- Introduce actual public transport travel times/routes
+- Mobile app
+- render graph on page load

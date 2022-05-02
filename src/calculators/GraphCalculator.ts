@@ -16,18 +16,17 @@ export default class GraphThing {
     this.graph = new jsgraphs.WeightedGraph(this.pubs.length);
 
     this.pubs.forEach((pub, index) => {
-
       console.log(`indexing pub ${index}`);
 
       const closest = this.getClosestPubs(new LatLng(pub.lat, pub.lng), 5);
 
-      closest.forEach(closePub => {
+      closest.forEach((closePub) => {
         const dist = computeDistanceBetween(pub, closePub);
         const edge = new jsgraphs.Edge(index, this.getPubIndex(closePub), dist);
 
         this.graph.addEdge(edge);
-      })
-    })
+      });
+    });
   }
 
   public getCrawlPubs(): Pub[] {
@@ -36,16 +35,16 @@ export default class GraphThing {
 
     var dijkstra = new jsgraphs.Dijkstra(this.graph, this.getPubIndex(startPub));
 
-    const endIndex = this.getPubIndex(endPub)
+    const endIndex = this.getPubIndex(endPub);
 
-    if(dijkstra.hasPathTo(endIndex)){
+    if (dijkstra.hasPathTo(endIndex)) {
       var path = dijkstra.pathTo(endIndex);
 
       const crawl = [this.pubs[path[0].from()]];
 
-      path.forEach(edge => {
+      path.forEach((edge) => {
         crawl.push(this.pubs[edge.to()]);
-      })
+      });
 
       return crawl;
     }
@@ -54,15 +53,17 @@ export default class GraphThing {
   }
 
   private getClosestPubs(point: LatLng, limit: number = 1): Pub[] {
-    return [...this.pubs].sort(((a, b) => {
-      a.distanceToNext = computeDistanceBetween(point, new LatLng(Number(a.lat), Number(a.lng)));
-      b.distanceToNext = computeDistanceBetween(point, new LatLng(Number(b.lat), Number(b.lng)));
+    return [...this.pubs]
+      .sort((a, b) => {
+        a.distanceToNext = computeDistanceBetween(point, new LatLng(Number(a.lat), Number(a.lng)));
+        b.distanceToNext = computeDistanceBetween(point, new LatLng(Number(b.lat), Number(b.lng)));
 
-      return a.distanceToNext - b.distanceToNext;
-    })).slice(0, limit);
+        return a.distanceToNext - b.distanceToNext;
+      })
+      .slice(0, limit);
   }
 
   private getPubIndex(pub: Pub): number {
-    return this.pubs.findIndex(testPub => testPub.id === pub.id);
+    return this.pubs.findIndex((testPub) => testPub.id === pub.id);
   }
 }

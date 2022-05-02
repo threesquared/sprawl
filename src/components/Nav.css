@@ -4,15 +4,15 @@
   margin: 10px 0px 0px 10px;
   background-color: #fff;
   border: 1px #000 Solid;
-  padding: 0px 10px 10px 10px
+  padding: 0px 10px 10px 10px;
 }
 
-input[type=number] {
+input[type='number'] {
   width: 30px;
   margin-left: 5px;
   margin-right: 5px;
 }
 
 button {
-  margin-top:  20px;
+  margin-top: 20px;
 }
