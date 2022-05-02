@@ -156,12 +156,12 @@ const App: React.FC = () => {
       const path = getLineString(pubCoords, start, end);
 
       getDirections(pubCoords)
-      .then(function(json: any) {
-        const path = getLineString(polyline.toGeoJSON(json).coordinates, start, end);
+      .then(function(res) {
+        const path = getLineString(polyline.toGeoJSON(res.geometry).coordinates, start, end);
 
         setPath(path);
       })
-      .catch(function(err: any) {
+      .catch(function(err) {
         console.error('Could not find directions', err);
         setPath(path);
       });

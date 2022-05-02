@@ -4,7 +4,7 @@ import './Nav.css';
 const Nav: React.FC<{ setPubLimit: Function, setDistanceLimit: Function, geoLocate: Function, showAll: boolean; setShowAll: Function }> = ({ setPubLimit, setDistanceLimit, geoLocate, showAll, setShowAll }) => {
   return (
     <div className="nav">
-      <h3>Spoons Pub Crawl Generator</h3>
+      <h3>Pub Crawl Generator</h3>
       <form>
         <span>
           I want to visit up to

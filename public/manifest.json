@@ -1,6 +1,6 @@
 {
-  "short_name": "Spoons Pub Crawl",
-  "name": "Wetherspoons Pub Crawl Generator",
+  "short_name": "Pub Crawl",
+  "name": "Pub Crawl Generator",
   "icons": [
     {
       "src": "favicon.ico",

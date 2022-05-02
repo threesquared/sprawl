@@ -8,7 +8,7 @@ const directionsService = directions({ accessToken: process.env.REACT_APP_MAPBOX
  *
  * @param coords
  */
-export async function getDirections(coordinates: Coordinates[]): Promise<string> {
+export async function getDirections(coordinates: Coordinates[]): Promise<{ geometry: string, distance: number }> {
   return new Promise((resolve, reject) => {
     directionsService.getDirections({
       profile: 'walking',
@@ -18,7 +18,10 @@ export async function getDirections(coordinates: Coordinates[]): Promise<string>
     })
     .send()
     .then(response => {
-      resolve(response.body.routes[0].geometry);
+      resolve({
+        geometry: response.body.routes[0].geometry,
+        distance: response.body.routes[0].distance,
+      });
     })
     .catch(err => {
       reject(err);
