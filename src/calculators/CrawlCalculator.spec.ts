@@ -1,5 +1,27 @@
+import { Pub } from '../components/App';
 import CrawlCalculator from './CrawlCalculator';
-import { getAllPubs, Pub } from '../lib/spoons';
+
+const getAllPubs = () => {
+  const pubs: Pub[] = [
+    {
+      id: '1',
+      name: 'Pub 1',
+      location: {
+        lat: 51.509865,
+        lng: -0.118092,
+      },
+    },
+    {
+      id: '2',
+      name: 'Pub 2',
+      location: {
+        lat: 51.509865,
+        lng: -0.118092,
+      },
+    },
+  ];
+  return pubs;
+};
 
 describe('crawl calculator', () => {
   describe('with no end', () => {

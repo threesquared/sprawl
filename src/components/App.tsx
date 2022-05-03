@@ -114,7 +114,13 @@ const App: React.FC = () => {
           calculator.setEnd(end);
         }
 
-        const crawlPubs = calculator.getCrawlPubs(pubLimit, distanceLimit);
+        let limit = pubLimit;
+
+        if (pubLimit > pubs.length) {
+          limit = pubs.length;
+        }
+
+        const crawlPubs = calculator.getCrawlPubs(limit, distanceLimit);
         setPubs(crawlPubs);
       });
     } else {
@@ -175,9 +181,9 @@ const App: React.FC = () => {
           event.preventDefault();
         }}
       >
-        {start && <LocationMarker location={start} setLocationFunction={setStart} />}
+        {start && <LocationMarker type="start" location={start} setLocationFunction={setStart} />}
         {getPubMarkers()}
-        {end && <LocationMarker location={end} setLocationFunction={setEnd} />}
+        {end && <LocationMarker type="end" location={end} setLocationFunction={setEnd} />}
         {path && <PathLine path={path} />}
         {getPubInfo()}
       </MapGL>

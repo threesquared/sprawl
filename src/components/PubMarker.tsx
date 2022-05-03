@@ -1,7 +1,7 @@
 import React from 'react';
 import { Marker } from 'react-map-gl';
 import { Pub } from './App';
-import pin from './pin.png';
+import pin from '../img/beer.png';
 
 const PubMarker: React.FC<{ pub: Pub; setSelectedPub: Function }> = ({ pub, setSelectedPub }) => {
   return (
@@ -9,8 +9,8 @@ const PubMarker: React.FC<{ pub: Pub; setSelectedPub: Function }> = ({ pub, setS
       key={pub.id}
       latitude={pub.location.lat}
       longitude={pub.location.lng}
-      offsetLeft={-14}
-      offsetTop={-38}
+      offsetLeft={-16}
+      offsetTop={-32}
     >
       <img
         src={pin}
