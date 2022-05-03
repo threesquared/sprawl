@@ -1,6 +1,7 @@
 import React from 'react';
 import { metersToMiles, LatLng } from '../lib/distance';
 import { Pub } from './App';
+import { Buffer } from 'buffer';
 import './CrawlInfo.css';
 
 const CrawlInfo: React.FC<{ pubs: Pub[]; start?: LatLng; end?: LatLng }> = ({

@@ -38,11 +38,11 @@ export function getLineString(
  */
 export function fitViewportToBounds(
   path: Feature<LineString>,
-  viewport: Partial<ViewportProps>,
+  viewport: ViewportProps,
   padding: number = 70
 ): Partial<ViewportProps> {
   const [minLng, minLat, maxLng, maxLat] = bbox(path);
-  const mercatorViewport = new WebMercatorViewport(viewport);
+  const mercatorViewport = new WebMercatorViewport(viewport as any);
   const { longitude, latitude, zoom } = mercatorViewport.fitBounds(
     [
       [minLng, minLat],

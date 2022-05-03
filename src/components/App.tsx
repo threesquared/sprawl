@@ -134,8 +134,9 @@ const App: React.FC = () => {
   useEffect(() => {
     if (start && pubs.length > 0) {
       const pubCoords = pubs.map((pub) => [pub.location.lng, pub.location.lat] as Coordinates);
+      const pubPath = getLineString(pubCoords, start, end);
 
-      getDirections(pubCoords)
+      getDirections(pubPath.geometry.coordinates)
         .then((res) => {
           const path = getLineString(polyline.toGeoJSON(res.geometry).coordinates, start, end);
           setPath(path);
@@ -143,9 +144,9 @@ const App: React.FC = () => {
         })
         .catch((err) => {
           console.error('Could not find directions', err);
-          const path = getLineString(pubCoords, start, end);
-          setPath(path);
-          setViewport(fitViewportToBounds(path, viewport));
+
+          setPath(pubPath);
+          setViewport(fitViewportToBounds(pubPath, viewport));
         });
     } else {
       setPath(undefined);

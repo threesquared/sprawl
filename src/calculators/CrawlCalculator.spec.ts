@@ -1,4 +1,5 @@
 import { Pub } from '../components/App';
+import { LatLng } from '../lib/distance';
 import CrawlCalculator from './CrawlCalculator';
 
 const getAllPubs = () => {
@@ -6,18 +7,14 @@ const getAllPubs = () => {
     {
       id: '1',
       name: 'Pub 1',
-      location: {
-        lat: 51.509865,
-        lng: -0.118092,
-      },
+      address: 'Address 1',
+      location: new LatLng(51.509865, -0.118092),
     },
     {
       id: '2',
       name: 'Pub 2',
-      location: {
-        lat: 51.509865,
-        lng: -0.118092,
-      },
+      address: 'Address 2',
+      location: new LatLng(51.509865, -0.118092),
     },
   ];
   return pubs;
