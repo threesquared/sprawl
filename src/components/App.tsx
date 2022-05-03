@@ -28,6 +28,7 @@ const App: React.FC = () => {
   const [end, setEnd] = useState<LatLng>();
   const [pubs, setPubs] = useState<Pub[]>([]);
   const [path, setPath] = useState<Feature<LineString>>();
+  const [distance, setDistance] = useState<number>();
   const [selectedPub, setSelectedPub] = useState<Pub>();
   const [pubLimit, setPubLimit] = useState(10);
   const [distanceLimit, setDistanceLimit] = useState(10);
@@ -141,6 +142,7 @@ const App: React.FC = () => {
           const path = getLineString(polyline.toGeoJSON(res.geometry).coordinates, start, end);
           setPath(path);
           setViewport(fitViewportToBounds(path, viewport));
+          setDistance(res.distance);
         })
         .catch((err) => {
           console.error('Could not find directions', err);

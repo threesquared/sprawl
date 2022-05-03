@@ -2,7 +2,7 @@
   "name": "sprawl",
   "version": "0.1.0",
   "private": true,
-  "homepage": "https://threesquared.github.io/sprawl",
+  "homepage": "https://pub.crawl.beer",
   "dependencies": {
     "@googlemaps/js-api-loader": "^1.14.1",
     "@mapbox/mapbox-sdk": "^0.13.3",

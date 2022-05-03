@@ -4,16 +4,16 @@ import { Pub } from './App';
 import { Buffer } from 'buffer';
 import './CrawlInfo.css';
 
-const CrawlInfo: React.FC<{ pubs: Pub[]; start?: LatLng; end?: LatLng }> = ({
+const CrawlInfo: React.FC<{ pubs: Pub[]; start?: LatLng; end?: LatLng; distance?: number }> = ({
   pubs,
   start,
   end,
+  distance,
 }) => {
   if (pubs.length === 0 || !start) {
     return null;
   }
 
-  const totalDistance = 99;
   const dest = pubs[pubs.length - 1];
   const waypoints = pubs.map((pub) => `${pub.location.lat},${pub.location.lng}`).join('|');
 
@@ -28,7 +28,7 @@ const CrawlInfo: React.FC<{ pubs: Pub[]; start?: LatLng; end?: LatLng }> = ({
     <div className="crawlInfo">
       <small>
         Your crawl visits {pubs.length} pubs and is approximately{' '}
-        {metersToMiles(totalDistance).toFixed(1)} miles long
+        {metersToMiles(distance || 0).toFixed(1)} miles long
       </small>
       <br />
       <small>
