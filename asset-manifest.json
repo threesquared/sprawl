@@ -1,22 +1,13 @@
 {
   "files": {
-    "main.css": "/sprawl/static/css/main.baf4f335.chunk.css",
-    "main.js": "/sprawl/static/js/main.77bda2a2.chunk.js",
-    "main.js.map": "/sprawl/static/js/main.77bda2a2.chunk.js.map",
-    "runtime-main.js": "/sprawl/static/js/runtime-main.f6bdc8d7.js",
-    "runtime-main.js.map": "/sprawl/static/js/runtime-main.f6bdc8d7.js.map",
-    "static/js/2.a1416328.chunk.js": "/sprawl/static/js/2.a1416328.chunk.js",
-    "static/js/2.a1416328.chunk.js.map": "/sprawl/static/js/2.a1416328.chunk.js.map",
-    "index.html": "/sprawl/index.html",
-    "precache-manifest.49f066a73cc3762d85e30b3fa85bbb6a.js": "/sprawl/precache-manifest.49f066a73cc3762d85e30b3fa85bbb6a.js",
-    "service-worker.js": "/sprawl/service-worker.js",
-    "static/css/main.baf4f335.chunk.css.map": "/sprawl/static/css/main.baf4f335.chunk.css.map",
-    "static/js/2.a1416328.chunk.js.LICENSE.txt": "/sprawl/static/js/2.a1416328.chunk.js.LICENSE.txt"
+    "main.css": "/static/css/main.2cdacedb.css",
+    "main.js": "/static/js/main.de488a0c.js",
+    "index.html": "/index.html",
+    "main.2cdacedb.css.map": "/static/css/main.2cdacedb.css.map",
+    "main.de488a0c.js.map": "/static/js/main.de488a0c.js.map"
   },
   "entrypoints": [
-    "static/js/runtime-main.f6bdc8d7.js",
-    "static/js/2.a1416328.chunk.js",
-    "static/css/main.baf4f335.chunk.css",
-    "static/js/main.77bda2a2.chunk.js"
+    "static/css/main.2cdacedb.css",
+    "static/js/main.de488a0c.js"
   ]
 }
