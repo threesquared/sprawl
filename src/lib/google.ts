@@ -1,4 +1,4 @@
-import { LatLng } from './distance';
+import { LatLng, milesToMeters } from './distance';
 import { Loader } from '@googlemaps/js-api-loader';
 import { Pub } from '../components/App';
 
@@ -14,7 +14,7 @@ const loader = new Loader({
  * @param service
  * @param location
  */
-export async function findPubs(location: LatLng): Promise<Pub[]> {
+export async function findPubs(location: LatLng, distance: number): Promise<Pub[]> {
   const google = await loader.load();
 
   const places = google.maps.places;
@@ -24,14 +24,16 @@ export async function findPubs(location: LatLng): Promise<Pub[]> {
     query: 'pub',
     openNow: true,
     location,
-    radius: 20000,
+    radius: milesToMeters(distance),
     type: 'bar',
     key: process.env.REACT_APP_GOOGLE_API_KEY as string,
   };
 
   return new Promise((resolve, reject) => {
-    service.textSearch(request, (results, status) => {
+    service.textSearch(request, (results, status, pagination) => {
       if (status === google.maps.places.PlacesServiceStatus.OK && results) {
+        // TODO: Implement pagination
+
         resolve(
           results.map((result) => {
             return {

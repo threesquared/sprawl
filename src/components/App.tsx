@@ -3,7 +3,7 @@ import MapGL, { Popup, ViewportProps } from 'react-map-gl';
 import polyline from '@mapbox/polyline';
 import { Feature, LineString } from '@turf/helpers';
 import { Coordinates } from '@mapbox/mapbox-sdk/lib/classes/mapi-request';
-import { findPubs } from '../lib/google';
+import { findPubs } from '../lib/fhrs';
 import { LatLng } from '../lib/distance';
 import { getLineString, fitViewportToBounds } from '../lib/geojson';
 import { getDirections } from '../lib/directions';
@@ -108,7 +108,7 @@ const App: React.FC = () => {
    */
   useEffect(() => {
     if (start) {
-      findPubs(start).then((pubs) => {
+      findPubs(start, distanceLimit).then((pubs) => {
         const calculator = new CrawlCalculator(pubs as Pub[], start);
 
         if (end) {
