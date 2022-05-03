@@ -166,7 +166,7 @@ const App: React.FC = () => {
         Fork me on GitHub
       </a>
       <Nav setPubLimit={setPubLimit} setDistanceLimit={setDistanceLimit} geoLocate={geoLocate} />
-      <CrawlInfo pubs={pubs} start={start} end={end} />
+      <CrawlInfo pubs={pubs} start={start} end={end} distance={distance} />
       <MapGL
         {...viewport}
         width="100%"

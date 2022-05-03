@@ -30,6 +30,7 @@ const CrawlInfo: React.FC<{ pubs: Pub[]; start?: LatLng; end?: LatLng; distance?
         Your crawl visits {pubs.length} pubs and is approximately{' '}
         {metersToMiles(distance || 0).toFixed(1)} miles long
       </small>
+      {/*
       <br />
       <small>
         {pubs.length <= 10 && (
@@ -48,6 +49,7 @@ const CrawlInfo: React.FC<{ pubs: Pub[]; start?: LatLng; end?: LatLng; distance?
           Link to this crawl
         </a>
       </small>
+      */}
     </div>
   );
 };
