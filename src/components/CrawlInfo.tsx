@@ -1,7 +1,7 @@
 import React from 'react';
+import polyline from '@mapbox/polyline';
 import { metersToMiles, LatLng } from '../lib/distance';
 import { Pub } from './App';
-import { Buffer } from 'buffer';
 import './CrawlInfo.css';
 
 const CrawlInfo: React.FC<{ pubs: Pub[]; start?: LatLng; end?: LatLng; distance?: number }> = ({
@@ -14,15 +14,16 @@ const CrawlInfo: React.FC<{ pubs: Pub[]; start?: LatLng; end?: LatLng; distance?
     return null;
   }
 
+  const geoJson: [number, number][] = [[start.lat, start.lng]];
+
+  if (end) {
+    geoJson.push([end.lat, end.lng]);
+  }
+
+  const saveData = polyline.encode(geoJson);
+
   const dest = pubs[pubs.length - 1];
   const waypoints = pubs.map((pub) => `${pub.location.lat},${pub.location.lng}`).join('|');
-
-  const saveObject = [
-    [+start.lat.toFixed(4), +start.lng.toFixed(4)],
-    end ? [+end.lat.toFixed(4), +end.lng.toFixed(4)] : null,
-  ];
-
-  const saveData = new Buffer(JSON.stringify(saveObject)).toString('base64');
 
   return (
     <div className="crawlInfo">
@@ -30,7 +31,6 @@ const CrawlInfo: React.FC<{ pubs: Pub[]; start?: LatLng; end?: LatLng; distance?
         Your crawl visits {pubs.length} pubs and is approximately{' '}
         {metersToMiles(distance || 0).toFixed(1)} miles long
       </small>
-      {/*
       <br />
       <small>
         {pubs.length <= 10 && (
@@ -49,7 +49,6 @@ const CrawlInfo: React.FC<{ pubs: Pub[]; start?: LatLng; end?: LatLng; distance?
           Link to this crawl
         </a>
       </small>
-      */}
     </div>
   );
 };

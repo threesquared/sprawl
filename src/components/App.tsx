@@ -97,15 +97,15 @@ const App: React.FC = () => {
   useEffect(() => {
     if (window.location.hash) {
       try {
-        const [savedStart, savedEnd] = JSON.parse(
-          new Buffer(window.location.hash.substring(1), 'base64').toString('ascii')
-        );
+        const linkData = polyline.decode(window.location.hash.substring(1));
 
-        if (savedEnd) {
-          setEnd(new LatLng(savedEnd[0], savedEnd[1]));
+        console.log(linkData);
+
+        setStart(new LatLng(linkData[0][0], linkData[0][1]));
+
+        if (linkData[1]) {
+          setEnd(new LatLng(linkData[1][0], linkData[1][1]));
         }
-
-        setStart(new LatLng(savedStart[0], savedStart[1]));
       } catch (e) {
         alert('Sorry, could not parse that saved url');
       }
