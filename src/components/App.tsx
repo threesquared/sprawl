@@ -1,11 +1,12 @@
-import React, { useState, useEffect } from 'react';
-import MapGL, { Popup, ViewportProps } from 'react-map-gl';
+import React, { useState, useEffect, useRef } from 'react';
+import Map, { Popup, MapRef, MapLayerMouseEvent } from 'react-map-gl';
 import polyline from '@mapbox/polyline';
+import bbox from '@turf/bbox';
 import { Feature, LineString } from '@turf/helpers';
 import { Coordinates } from '@mapbox/mapbox-sdk/lib/classes/mapi-request';
 import { findPubs } from '../lib/fhrs';
 import { LatLng } from '../lib/distance';
-import { getLineString, fitViewportToBounds } from '../lib/geojson';
+import { getLineString } from '../lib/geojson';
 import { getDirections } from '../lib/directions';
 import CrawlCalculator from '../calculators/CrawlCalculator';
 import Nav from './Nav';
@@ -24,6 +25,7 @@ export interface Pub {
 }
 
 const App: React.FC = () => {
+  const mapRef = useRef<MapRef>(null);
   const [start, setStart] = useState<LatLng>();
   const [end, setEnd] = useState<LatLng>();
   const [pubs, setPubs] = useState<Pub[]>([]);
@@ -32,13 +34,6 @@ const App: React.FC = () => {
   const [selectedPub, setSelectedPub] = useState<Pub>();
   const [pubLimit, setPubLimit] = useState(10);
   const [distanceLimit, setDistanceLimit] = useState(10);
-  const [viewport, setViewport] = useState<Partial<ViewportProps>>({
-    latitude: 51.5074,
-    longitude: 0.1278,
-    zoom: 9,
-    // bearing: 0,
-    // pitch: 50
-  });
 
   /**
    * Ask user for their location and set the crawl start to that position
@@ -67,7 +62,6 @@ const App: React.FC = () => {
     return (
       selectedPub && (
         <Popup
-          tipSize={5}
           anchor="top"
           longitude={selectedPub.location.lng}
           latitude={selectedPub.location.lat}
@@ -79,6 +73,23 @@ const App: React.FC = () => {
       )
     );
   };
+
+  /**
+   * Zoom the map to fit the current path
+   */
+  useEffect(() => {
+    if (path) {
+      const [minLng, minLat, maxLng, maxLat] = bbox(path);
+
+      mapRef.current?.fitBounds(
+        [
+          [minLng, minLat],
+          [maxLng, maxLat],
+        ],
+        { padding: 80, duration: 2000 }
+      );
+    }
+  }, [path]);
 
   /**
    * Called on first load, generate initial path from saved hash or users current location
@@ -141,14 +152,12 @@ const App: React.FC = () => {
         .then((res) => {
           const path = getLineString(polyline.toGeoJSON(res.geometry).coordinates, start, end);
           setPath(path);
-          setViewport(fitViewportToBounds(path, viewport));
           setDistance(res.distance);
         })
         .catch((err) => {
           console.error('Could not find directions', err);
 
           setPath(pubPath);
-          setViewport(fitViewportToBounds(pubPath, viewport));
         });
     } else {
       setPath(undefined);
@@ -167,20 +176,28 @@ const App: React.FC = () => {
       </a>
       <Nav setPubLimit={setPubLimit} setDistanceLimit={setDistanceLimit} geoLocate={geoLocate} />
       <CrawlInfo pubs={pubs} start={start} end={end} distance={distance} />
-      <MapGL
-        {...viewport}
-        width="100%"
-        height="100%"
+      <Map
+        ref={mapRef}
+        style={{
+          width: '100%',
+          height: '100%',
+        }}
         mapStyle="mapbox://styles/mapbox/streets-v11"
-        mapboxApiAccessToken={process.env.REACT_APP_MAPBOX_TOKEN}
-        onViewportChange={setViewport}
-        onClick={(event: any) => {
-          if (event.leftButton === true && event.target.nodeName !== 'IMG') {
-            setStart(new LatLng(event.lngLat[1], event.lngLat[0]));
+        mapboxAccessToken={process.env.REACT_APP_MAPBOX_TOKEN}
+        initialViewState={{
+          latitude: 51.5074,
+          longitude: 0.1278,
+          zoom: 9,
+          // bearing: 0,
+          // pitch: 50
+        }}
+        onClick={(event: MapLayerMouseEvent) => {
+          if ((event!.originalEvent!.target! as any).nodeName !== 'IMG') {
+            setStart(new LatLng(event.lngLat.lat, event.lngLat.lng));
           }
         }}
-        onContextMenu={(event: any) => {
-          setEnd(new LatLng(event.lngLat[1], event.lngLat[0]));
+        onContextMenu={(event: MapLayerMouseEvent) => {
+          setEnd(new LatLng(event.lngLat.lat, event.lngLat.lng));
           event.preventDefault();
         }}
       >
@@ -189,7 +206,7 @@ const App: React.FC = () => {
         {end && <LocationMarker type="end" location={end} setLocationFunction={setEnd} />}
         {path && <PathLine path={path} />}
         {getPubInfo()}
-      </MapGL>
+      </Map>
     </div>
   );
 };

@@ -5,13 +5,7 @@ import pin from '../img/beer.png';
 
 const PubMarker: React.FC<{ pub: Pub; setSelectedPub: Function }> = ({ pub, setSelectedPub }) => {
   return (
-    <Marker
-      key={pub.id}
-      latitude={pub.location.lat}
-      longitude={pub.location.lng}
-      offsetLeft={-16}
-      offsetTop={-32}
-    >
+    <Marker key={pub.id} latitude={pub.location.lat} longitude={pub.location.lng} anchor="bottom">
       <img
         src={pin}
         alt={pub.name}

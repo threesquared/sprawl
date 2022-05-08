@@ -10,7 +10,7 @@ const LocationMarker: React.FC<{
   setLocationFunction: Function;
 }> = ({ type, location, setLocationFunction }) => {
   return (
-    <Marker latitude={location.lat} longitude={location.lng} offsetLeft={-15} offsetTop={-31}>
+    <Marker latitude={location.lat} longitude={location.lng} offset={[0, -15]}>
       <img
         src={type === 'start' ? start : finish}
         alt="location"
